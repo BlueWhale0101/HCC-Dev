@@ -3310,36 +3310,18 @@ function scoreTaskForWindow(task, options = {}) {
   const signals = intelligenceContext?.signals || options.signals || [];
   const tomorrowSnapshot = intelligenceContext?.tomorrowSnapshot || options.tomorrowSnapshot || null;
   const evening = intelligenceContext?.evening ?? options.evening ?? isEvening();
-  let score = 0;
+  let score = HCC?.tasks?.scoreTask
+    ? HCC.tasks.scoreTask(task, { now, dueBucket, windowName, evening })
+    : 0;
 
-  if (windowName === 'today') {
-    if (dueBucket === 'overdue') score += 80;
-    if (dueBucket === 'today') score += 58;
-    if (dueBucket === 'tomorrow') score += evening ? 22 : 8;
-    if (dueBucket === 'future') score -= 12;
-    if (dueBucket === 'undated') score -= 18;
-    if (evening && hasEveningCue(task)) score += 16;
-  }
+  if (windowName === 'today' && evening && hasEveningCue(task)) score += 12;
 
   if (windowName === 'tomorrow') {
-    if (dueBucket === 'tomorrow') score += 62;
-    if (dueBucket === 'today') score += evening ? 18 : 4;
-    if (dueBucket === 'overdue') score += 14;
-    if (dueBucket === 'future') score -= 8;
-    if (dueBucket === 'undated') score -= 18;
     if (evening && hasTomorrowPrepCue(task)) score += 16;
     score += taskTomorrowEventStrength(task, tomorrowSnapshot);
   }
 
-  if (isInMotionPanel(task.panel)) score += 12;
-  if (task.recurrence) score += 7;
   score += taskSignalStrength(task, signals);
-  if (task.isMine) score += 2;
-
-  if (task.dueDate) {
-    const diff = Math.abs(task.dueDate.getTime() - startOfDay(now).getTime());
-    score += Math.max(0, 6 - Math.floor(diff / 86400000));
-  }
 
   return score;
 }
@@ -3499,7 +3481,7 @@ function normalizeTaskRows() {
     .map((task) => {
       const dueDate = normalizeDate(task[dateField] || task.due_text || task.due_date || task.due, task.created_at);
       const owner = task[ownerField] || '';
-      return {
+      const normalizedTask = {
         id: task.id,
         title: String(task[titleField] || 'Untitled task'),
         owner,
@@ -3511,9 +3493,12 @@ function normalizeTaskRows() {
         panel: task.panel || '',
         raw: task,
         kind: 'Task',
+        createdAt: task.created_at || task.updated_at || '',
         sortScore: dueDate ? dueDate.getTime() : Number.MAX_SAFE_INTEGER,
         isMine: owner ? String(owner).toLowerCase() === actor.toLowerCase() : false,
       };
+      normalizedTask.category = HCC?.tasks?.inferCategory ? HCC.tasks.inferCategory(normalizedTask) : 'general';
+      return normalizedTask;
     })
     .sort((a, b) => {
       if (a.sortScore !== b.sortScore) return a.sortScore - b.sortScore;
