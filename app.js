@@ -146,66 +146,7 @@ function setTaskCategoryOverride(taskId, category) {
 }
 
 function openTaskCategoryOverrideModal(task) {
-  if (!task?.id) return;
-  const defs = Array.isArray(HCC?.tasks?.CATEGORY_DEFINITIONS) ? HCC.tasks.CATEGORY_DEFINITIONS : [];
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay signal-modal-overlay';
-  const panel = document.createElement('section');
-  panel.className = 'modal-panel signal-modal-panel';
-  const body = document.createElement('div');
-  body.className = 'mobile-stack signal-modal-form';
-  const currentOverride = getTaskCategoryOverride(task.id);
-  const inferred = HCC?.tasks?.inferCategory ? HCC.tasks.inferCategory({ ...task, manualCategory: '' }) : (task.category || 'general');
-  const draft = { value: currentOverride || 'auto' };
-
-  const close = () => overlay.remove();
-  overlay.addEventListener('click', (event) => {
-    if (event.target === overlay) close();
-  });
-
-  const header = document.createElement('div');
-  header.className = 'signal-modal-header';
-  const title = document.createElement('div');
-  title.className = 'signal-modal-title';
-  title.textContent = 'Task category';
-  const subtitle = document.createElement('div');
-  subtitle.className = 'signal-modal-subtitle';
-  subtitle.textContent = task.title || 'Untitled task';
-  header.append(title, subtitle);
-
-  body.append(makeSelectField('Category override', [['auto', `Auto (inferred: ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(inferred) : inferred})`], ...defs.map((def) => [def.key, def.label])], draft.value, (value) => {
-    draft.value = value;
-  }));
-
-  const hint = document.createElement('div');
-  hint.className = 'muted';
-  hint.textContent = currentOverride
-    ? `Current override: ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(currentOverride) : currentOverride}. Switch back to Auto to clear it.`
-    : 'Overrides are local to this device for now. Auto uses the inferred category.';
-  body.append(hint);
-
-  const footer = document.createElement('div');
-  footer.className = 'signal-modal-footer';
-  const cancelBtn = document.createElement('button');
-  cancelBtn.type = 'button';
-  cancelBtn.className = 'secondary-button';
-  cancelBtn.textContent = 'Cancel';
-  cancelBtn.addEventListener('click', close);
-  const saveBtn = document.createElement('button');
-  saveBtn.type = 'button';
-  saveBtn.className = 'primary-button';
-  saveBtn.textContent = 'Save';
-  saveBtn.addEventListener('click', () => {
-    setTaskCategoryOverride(task.id, draft.value);
-    close();
-    showToast(draft.value === 'auto' ? 'Category override cleared' : `Category set to ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(draft.value) : draft.value}`);
-    renderMode();
-  });
-  footer.append(cancelBtn, saveBtn);
-
-  panel.append(header, body, footer);
-  overlay.append(panel);
-  document.body.append(overlay);
+  if (HCC?.ui?.openTaskCategoryOverrideModal) return HCC.ui.openTaskCategoryOverrideModal(task);
 }
 
 
@@ -3390,153 +3331,11 @@ function openQuickView(title, items, emptyText) {
 
 
 function openBedroomItemModal(item, options = {}) {
-  if (!item) return;
-  let dialog = document.getElementById('bedroom-detail-dialog');
-  if (!dialog) {
-    dialog = document.createElement('dialog');
-    dialog.id = 'bedroom-detail-dialog';
-    dialog.className = 'quick-view-dialog bedroom-detail-dialog';
-    dialog.innerHTML = `
-      <form method="dialog" class="quick-view-form settings-form bedroom-detail-form">
-        <div class="dialog-header">
-          <h2 id="bedroom-detail-title">Details</h2>
-          <button value="cancel" class="secondary-button">Close</button>
-        </div>
-        <div id="bedroom-detail-body" class="bedroom-detail-body"></div>
-      </form>
-    `;
-    document.body.append(dialog);
-  }
-
-  const kind = options.kind || item.kind || 'item';
-  dialog.querySelector('#bedroom-detail-title').textContent = kind === 'event'
-    ? 'Next Event'
-    : kind === 'signal'
-      ? 'Signal'
-      : 'Best Next';
-
-  const body = dialog.querySelector('#bedroom-detail-body');
-  body.replaceChildren();
-
-  const hero = document.createElement('section');
-  hero.className = `bedroom-detail-hero ${item.categoryKey ? `spotlight-category-${item.categoryKey}` : ''}`.trim();
-
-  const top = document.createElement('div');
-  top.className = 'bedroom-detail-top';
-  if (item.pill) top.append(buildPill(item.pill, item.pillClass || ''));
-  if (kind === 'task') {
-    const editButton = buildSecondaryButton('Change category', () => {
-      const task = appState.tasks.find((candidate) => candidate.id === item.id);
-      if (task) openTaskCategoryOverrideModal(task);
-    }, 'mini-button');
-    top.append(editButton);
-  }
-  hero.append(top);
-
-  const title = document.createElement('div');
-  title.className = 'bedroom-detail-title';
-  title.textContent = item.title || 'Untitled';
-  hero.append(title);
-
-  if (item.meta) {
-    const meta = document.createElement('div');
-    meta.className = 'bedroom-detail-meta';
-    meta.textContent = item.meta;
-    hero.append(meta);
-  }
-
-  if (item.actionHint) {
-    const hint = document.createElement('div');
-    hint.className = 'bedroom-detail-hint';
-    hint.textContent = item.actionHint;
-    hero.append(hint);
-  }
-
-  body.append(hero);
-
-  if (typeof dialog.showModal === 'function') dialog.showModal();
-  else dialog.setAttribute('open', 'open');
+  if (HCC?.ui?.openBedroomItemModal) return HCC.ui.openBedroomItemModal(item, options);
 }
 
 function openBedroomStatusModal() {
-  let dialog = document.getElementById('bedroom-status-dialog');
-  if (!dialog) {
-    dialog = document.createElement('dialog');
-    dialog.id = 'bedroom-status-dialog';
-    dialog.className = 'quick-view-dialog bedroom-status-dialog';
-    dialog.innerHTML = `
-      <form method="dialog" class="quick-view-form settings-form bedroom-detail-form">
-        <div class="dialog-header">
-          <h2>System status</h2>
-          <button value="cancel" class="secondary-button">Close</button>
-        </div>
-        <div id="bedroom-status-body" class="bedroom-detail-body"></div>
-      </form>
-    `;
-    document.body.append(dialog);
-  }
-
-  const body = dialog.querySelector('#bedroom-status-body');
-  body.replaceChildren();
-
-  const health = getAmbientHealthState();
-  const summary = document.createElement('section');
-  summary.className = `bedroom-status-summary bedroom-status-summary-${health.level}`;
-
-  const summaryTop = document.createElement('div');
-  summaryTop.className = 'bedroom-detail-top';
-  summaryTop.append(
-    buildPill(health.level === 'degraded' ? 'Degraded' : health.level === 'aging' ? 'Aging' : 'Healthy', health.level === 'degraded' ? 'warning' : health.level === 'aging' ? 'notice' : ''),
-    buildPill(`v${APP_VERSION || 'unknown'}`)
-  );
-  summary.append(summaryTop);
-
-  const summaryTitle = document.createElement('div');
-  summaryTitle.className = 'bedroom-detail-title';
-  summaryTitle.textContent = health.title || 'System status';
-  summary.append(summaryTitle);
-
-  const summaryMeta = document.createElement('div');
-  summaryMeta.className = 'bedroom-detail-meta';
-  summaryMeta.textContent = health.message || 'Live view is healthy.';
-  summary.append(summaryMeta);
-
-  body.append(summary);
-
-  const calendarState = getCalendarServiceState();
-  const weatherState = getWeatherServiceState();
-  const sections = [
-    {
-      title: 'Freshness',
-      items: getDataFreshnessItems(),
-      empty: 'No freshness data available yet.',
-    },
-    {
-      title: 'Calendar',
-      items: calendarState.items,
-      empty: 'No calendar accounts are connected yet.',
-    },
-    {
-      title: 'Weather',
-      items: weatherState.items.length
-        ? weatherState.items
-        : [{ title: weatherState.locationLabel, meta: 'Weather is not configured yet.', pill: 'Setup', pillClass: 'warning' }],
-      empty: 'No weather status available yet.',
-    },
-  ];
-
-  sections.forEach((sectionDef) => {
-    const card = document.createElement('section');
-    card.className = 'bedroom-status-section';
-    const titleEl = document.createElement('h3');
-    titleEl.className = 'bedroom-status-section-title';
-    titleEl.textContent = sectionDef.title;
-    card.append(titleEl, renderTaskList(sectionDef.items || [], sectionDef.empty, { showPills: true }));
-    body.append(card);
-  });
-
-  if (typeof dialog.showModal === 'function') dialog.showModal();
-  else dialog.setAttribute('open', 'open');
+  if (HCC?.ui?.openBedroomStatusModal) return HCC.ui.openBedroomStatusModal();
 }
 
 function buildCard(title, subtitle, body, extraClass = '') {
@@ -3651,48 +3450,17 @@ function rankTasksForWindow(tasks, options = {}) {
 }
 
 function normalizeDisplayCalendarItem(item = {}) {
-  const base = {
-    ...item,
-    title: item.title || item.summary || '(Untitled event)',
-    sourceLabel: item.sourceLabel || item.calendarSummary || item.calendar?.summary || 'Calendar',
-    description: item.description || '',
-    location: item.location || '',
-    calendarSummary: item.calendarSummary || item.calendar?.summary || '',
-    kind: 'Calendar',
-  };
-  return HCC?.tasks?.applyCategoryMetadata ? HCC.tasks.applyCategoryMetadata(base) : { ...base, category: 'general', categoryDebug: null };
+  return HCC?.display?.normalizeCalendarItem
+    ? HCC.display.normalizeCalendarItem(item)
+    : (HCC?.tasks?.applyCategoryMetadata ? HCC.tasks.applyCategoryMetadata(item) : { ...item, category: 'general', categoryDebug: null, effectiveCategory: 'general' });
 }
 
 function buildCategoryDebugMeta(item) {
-  const debug = item?.categoryDebug;
-  if (!debug) return '';
-  const confidence = Number.isFinite(debug.confidence) ? `${Math.round(debug.confidence * 100)}%` : '';
-  const candidates = Array.isArray(debug.candidateKeys) && debug.candidateKeys.length
-    ? `candidates ${debug.candidateKeys.join(', ')}`
-    : '';
-  const inferred = debug.manualOverride && debug.inferredCategory
-    ? `inferred ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(debug.inferredCategory) : debug.inferredCategory}`
-    : '';
-  return [debug.matchedRule, debug.matchedText ? `match ${debug.matchedText}` : '', confidence, candidates, inferred].filter(Boolean).join(' · ');
+  return HCC?.display?.buildCategoryDebugMeta ? HCC.display.buildCategoryDebugMeta(item) : '';
 }
 
 function mapSnapshotItemsToDisplay(items = [], labelPrefix = '') {
-  return items.map((rawItem, index) => {
-    const item = normalizeDisplayCalendarItem(rawItem);
-    return {
-      id: item.id || item.eventId || item.uid || `${item.title || 'calendar'}-${item.time || index}`,
-      itemKey: `calendar:${item.id || item.eventId || item.uid || `${item.title || 'calendar'}-${item.time || index}`}`,
-      title: item.title,
-      meta: [item.sourceLabel || 'Calendar', labelPrefix && item.time ? `${labelPrefix} · ${item.time}` : labelPrefix || item.time].filter(Boolean).join(' · '),
-      pill: HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(item.category) : 'Calendar',
-      pillClass: `category-pill ${item.category || 'general'} calendar-pill`.trim(),
-      categoryKey: item.category || 'general',
-      rowClass: `calendar-list-item calendar-category-${item.category || 'general'}`,
-      categoryDebug: item.categoryDebug || null,
-      actionHint: buildCategoryDebugMeta(item),
-      kind: 'Calendar',
-    };
-  });
+  return HCC?.display?.mapSnapshotItemsToDisplay ? HCC.display.mapSnapshotItemsToDisplay(items, labelPrefix) : [];
 }
 
 function selectTasksByDueBucket(tasks, dueBucketById, buckets) {
@@ -3870,27 +3638,7 @@ function taskRowClass(task, armed = false) {
 }
 
 function toDisplayTaskItems(tasks, fallbackPill = 'Task') {
-  return tasks.map((task) => {
-    if (task.signal_type || task.severity) return signalToItem(task);
-    const dueMeta = task.dueDate ? formatTaskTiming(task.dueDate) : (task.dueText || 'No due date');
-    const owner = task.owner || '';
-    const canComplete = !!task.id && !pendingTaskCompletions.has(task.id);
-    const armed = canComplete && isTaskCompletionArmed(task.id);
-    return {
-      id: task.id,
-      itemKey: `task:${task.id || task.title}`,
-      title: task.title,
-      meta: [owner, armed ? 'Ready to complete' : dueMeta].filter(Boolean).join(' · '),
-      pill: armed ? 'Ready' : (HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(task.category) : (task.dueDate && task.dueDate < startOfDay(getNowDate()) ? 'Overdue' : task.dueDate && isSameDay(task.dueDate, getNowDate()) ? 'Today' : fallbackPill)),
-      pillClass: `category-pill ${task.category || 'general'} ${armed ? 'warning' : (task.dueDate && task.dueDate < startOfDay(getNowDate()) ? 'danger' : '')}`.trim(),
-      ownerKey: normalizeOwnerKey(owner),
-      categoryKey: task.category || 'general',
-      emphasis: armed ? 'armed' : (task.dueDate && task.dueDate < startOfDay(getNowDate()) ? 'high' : task.dueDate && isSameDay(task.dueDate, getNowDate()) ? 'medium' : 'normal'),
-      rowClass: `${taskRowClass(task, armed)} task-category-${task.category || 'general'}`,
-      actionHint: canComplete ? (armed ? 'Tap again to complete' : 'Tap once to arm completion') : '',
-      onActivate: canComplete ? () => completeTask(task.raw || task) : null,
-    };
-  });
+  return HCC?.display?.toDisplayTaskItems ? HCC.display.toDisplayTaskItems(tasks, fallbackPill) : [];
 }
 
 function buildKitchenHeadline(digest) {
