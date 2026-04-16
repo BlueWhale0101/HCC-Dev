@@ -1,3 +1,10 @@
+let autoRefreshTimer = null;
+let slowStateBackstopTimer = null;
+let calendarPublishTimer = null;
+let housekeepingTimer = null;
+let pendingTaskCompletions = new Set();
+let pendingSignalActions = new Set();
+let armedTaskCompletions = new Map();
 window.__hccBootState = window.__hccBootState || { started: false, finished: false, phase: 'script-loaded', version: APP_VERSION, errors: [] };
 window.__HCC_FORCE_BOOT = () => startBootstrap();
 
