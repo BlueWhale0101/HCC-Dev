@@ -1549,6 +1549,7 @@ body.mobile-mode .topbar {
   box-shadow: inset 3px 0 0 var(--owner-shared);
 }
 
+
 .task-category-child {
   border-color: rgba(190, 149, 255, 0.22);
   background: rgba(190, 149, 255, 0.06);
@@ -1569,9 +1570,39 @@ body.mobile-mode .topbar {
   background: rgba(255, 213, 124, 0.06);
 }
 
-.task-category-planning {
-  border-color: rgba(255, 166, 125, 0.2);
-  background: rgba(255, 166, 125, 0.05);
+.task-category-travel {
+  border-color: rgba(120, 216, 226, 0.22);
+  background: rgba(120, 216, 226, 0.06);
+}
+
+.task-category-fitness {
+  border-color: rgba(255, 128, 160, 0.22);
+  background: rgba(255, 128, 160, 0.06);
+}
+
+.task-category-creative {
+  border-color: rgba(208, 150, 255, 0.22);
+  background: rgba(208, 150, 255, 0.06);
+}
+
+.task-category-garden {
+  border-color: rgba(105, 214, 145, 0.24);
+  background: rgba(105, 214, 145, 0.06);
+}
+
+.task-category-work_skye {
+  border-color: rgba(255, 152, 120, 0.24);
+  background: rgba(255, 152, 120, 0.06);
+}
+
+.task-category-project {
+  border-color: rgba(150, 180, 255, 0.22);
+  background: rgba(150, 180, 255, 0.06);
+}
+
+.task-category-general {
+  border-color: rgba(181, 220, 189, 0.12);
+  background: rgba(255,255,255,0.03);
 }
 
 .pill.category-pill.child {
@@ -1594,9 +1625,39 @@ body.mobile-mode .topbar {
   color: #fff2cd;
 }
 
-.pill.category-pill.planning {
-  background: rgba(255, 166, 125, 0.16);
-  color: #ffe7dc;
+.pill.category-pill.travel {
+  background: rgba(120, 216, 226, 0.18);
+  color: #defcff;
+}
+
+.pill.category-pill.fitness {
+  background: rgba(255, 128, 160, 0.18);
+  color: #ffe0ea;
+}
+
+.pill.category-pill.creative {
+  background: rgba(208, 150, 255, 0.18);
+  color: #f1deff;
+}
+
+.pill.category-pill.garden {
+  background: rgba(105, 214, 145, 0.18);
+  color: #def8e7;
+}
+
+.pill.category-pill.work_skye {
+  background: rgba(255, 152, 120, 0.18);
+  color: #ffe7de;
+}
+
+.pill.category-pill.project {
+  background: rgba(150, 180, 255, 0.18);
+  color: #e4ecff;
+}
+
+.pill.category-pill.general {
+  background: rgba(181, 220, 189, 0.12);
+  color: #e8f3ea;
 }
 
 .spotlight-secondary-list {

@@ -1,28 +1,73 @@
-
 window.HCC = window.HCC || {};
 HCC.tasks = HCC.tasks || {};
+
+HCC.tasks.CATEGORY_DEFINITIONS = [
+  {
+    key: 'work_skye',
+    label: 'Skye Work',
+    pattern: /(skye work|photo paper|photo printer|portfolio|memory cards?|adobe( cloud)?|framing|mat boards?|photo(?:graphy|s)?|printer|archived photos?|luster|semigloss|frame(?:\b|ing))/,
+  },
+  {
+    key: 'child',
+    label: 'Child',
+    pattern: /(\btor\b|torben|\bboo\b|kindy|kindergarten|school run|toy library|playgroup|play group|daycare|day care|childcare|child care|preschool|pre-school|drop ?off|pickup|pick up|lunchbox|backpack|uniform|teacher|class(?:room)?|playroom|toys?\b|kids?\b|child\b|birthday|drawings?|travel cot)/,
+  },
+  {
+    key: 'travel',
+    label: 'Travel',
+    pattern: /(flight|flights|hotel|airbnb|airport|transfers?|transport|trip|travel|sydney|olympic park|reservation|book .*hotel|book .*flight|book .*airbnb)/,
+  },
+  {
+    key: 'fitness',
+    label: 'Fitness',
+    pattern: /(hyrox|crossfit|aquatic centre|recovery session|workout|gym|training|train\b|race day|race\b)/,
+  },
+  {
+    key: 'garden',
+    label: 'Garden',
+    pattern: /(garden|plants?\b|drippers?|hose|front yard|weed(?: killer)?|sprayer|yard\b|soil|pots?\b|watering|dig plants|killer front yard)/,
+  },
+  {
+    key: 'creative',
+    label: 'Creative',
+    pattern: /(opera|concert|woodwork(?:ing)?|reading|cricut|design(?:ing)?|tshirts?|t-shirts?|shirts?\b|great opera hits|opera house)/,
+  },
+  {
+    key: 'project',
+    label: 'Project',
+    pattern: /(garden board|homecommandcenter|device\b|setup (?:tv|kitchen|bedroom|laundry)|realtime|task board|app\b|debug|sync\b|version\b|mounting .*device|add colour to tasks)/,
+  },
+  {
+    key: 'errand',
+    label: 'Errand',
+    pattern: /(buy\b|shopping|shop\b|store\b|post office|library\b|woolies|pharmacy|kmart|redeem|pickup|pick up|collect\b|get another|parts list|pick up package)/,
+  },
+  {
+    key: 'admin',
+    label: 'Admin',
+    pattern: /(call\b|email\b|message\b|report\b|schedule\b|appointment|pay\b|rego|bill\b|police|gardeners?|doctor|dentist|counseling|paperwork|forms?\b|connect to)/,
+  },
+  {
+    key: 'home',
+    label: 'Home',
+    pattern: /(laundry|clean\b|cleaning|dishes|bins\b|trash|garbage|fold\b|dryer|washer|kitchen\b|bed(?:room)?\b|organize|storage|shed\b|patio|windowsills?|doors?\b|light switches|vacuum|rug\b|pillows?|gazebo|desk\b|sideboard|cord\b|walls?\b|robot vacuum|shower|windows?\b|sliding doors|pool storage|outdoor)/,
+  },
+];
 
 HCC.tasks.inferCategory = function inferCategory(task) {
   const parts = [task?.tag, task?.title, task?.description].filter(Boolean).join(' ').toLowerCase();
   if (!parts) return 'general';
-  if (/(tor|torben|kindy|kindergarten|school|playgroup|play group|childcare|daycare|day care|preschool|pre-school|drop ?off|pickup|pick up|school run|lunchbox|backpack|excursion|parent.?teacher|teacher|classroom|uniform|nappies|diaper|nap time|story time)/.test(parts)) return 'child';
-  if (/(laundry|clean|dishes|bins|trash|garbage|fold|dryer|washer|kitchen|bed)/.test(parts)) return 'home';
-  if (/(call|email|book|schedule|appointment|meeting|doctor|dentist|paperwork|form|admin)/.test(parts)) return 'admin';
-  if (/(buy|shop|shopping|pickup|pick up|store|grocer|grocery|pharmacy|post office|library|errand)/.test(parts)) return 'errand';
-  if (/(school|daycare|kid|kids|hyrox|workout|gym|train|practice|trip|travel|pack)/.test(parts)) return 'planning';
+  const defs = HCC.tasks.CATEGORY_DEFINITIONS || [];
+  for (const def of defs) {
+    if (def.pattern && def.pattern.test(parts)) return def.key;
+  }
   return 'general';
 };
 
 HCC.tasks.getCategoryLabel = function getCategoryLabel(category) {
-  const labels = {
-    child: 'Child',
-    home: 'Home',
-    admin: 'Admin',
-    errand: 'Errand',
-    planning: 'Planning',
-    general: 'Task',
-  };
-  return labels[category] || 'Task';
+  const defs = HCC.tasks.CATEGORY_DEFINITIONS || [];
+  const match = defs.find((item) => item.key === category);
+  return match?.label || 'Task';
 };
 
 HCC.tasks.scoreTask = function scoreTask(task, context) {
