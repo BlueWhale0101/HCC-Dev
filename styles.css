@@ -636,7 +636,7 @@ body, button, .version-tag, .version-tag * {
   width: fit-content;
   border-radius: 999px;
   padding: 0.28rem 0.7rem;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.6rem;
   background: rgba(125, 215, 154, 0.16);
   color: var(--accent);
   font-size: 0.9rem;
@@ -1550,135 +1550,115 @@ body.mobile-mode .topbar {
 }
 
 
+
+
 .task-category-child,
-.calendar-category-child {
-  border-color: rgba(190, 149, 255, 0.32);
-  background: rgba(190, 149, 255, 0.12);
+.calendar-category-child,
+.spotlight-category-child {
+  border-color: rgba(190, 149, 255, 0.38);
+  background: rgba(190, 149, 255, 0.14);
+  box-shadow: inset 4px 0 0 rgba(190, 149, 255, 0.82);
 }
 
 .task-category-home,
-.calendar-category-home {
-  border-color: rgba(125, 215, 154, 0.28);
-  background: rgba(125, 215, 154, 0.11);
+.calendar-category-home,
+.spotlight-category-home {
+  border-color: rgba(125, 215, 154, 0.34);
+  background: rgba(125, 215, 154, 0.13);
+  box-shadow: inset 4px 0 0 rgba(125, 215, 154, 0.78);
 }
 
 .task-category-admin,
-.calendar-category-admin {
-  border-color: rgba(125, 174, 255, 0.3);
-  background: rgba(125, 174, 255, 0.11);
+.calendar-category-admin,
+.spotlight-category-admin {
+  border-color: rgba(125, 174, 255, 0.36);
+  background: rgba(125, 174, 255, 0.13);
+  box-shadow: inset 4px 0 0 rgba(125, 174, 255, 0.8);
 }
 
 .task-category-errand,
-.calendar-category-errand {
-  border-color: rgba(255, 213, 124, 0.3);
-  background: rgba(255, 213, 124, 0.12);
+.calendar-category-errand,
+.spotlight-category-errand {
+  border-color: rgba(255, 213, 124, 0.36);
+  background: rgba(255, 213, 124, 0.14);
+  box-shadow: inset 4px 0 0 rgba(255, 213, 124, 0.84);
 }
 
 .task-category-travel,
-.calendar-category-travel {
-  border-color: rgba(120, 216, 226, 0.32);
-  background: rgba(120, 216, 226, 0.12);
+.calendar-category-travel,
+.spotlight-category-travel {
+  border-color: rgba(120, 216, 226, 0.38);
+  background: rgba(120, 216, 226, 0.14);
+  box-shadow: inset 4px 0 0 rgba(120, 216, 226, 0.84);
 }
 
 .task-category-fitness,
-.calendar-category-fitness {
-  border-color: rgba(255, 128, 160, 0.32);
-  background: rgba(255, 128, 160, 0.12);
+.calendar-category-fitness,
+.spotlight-category-fitness {
+  border-color: rgba(255, 128, 160, 0.38);
+  background: rgba(255, 128, 160, 0.14);
+  box-shadow: inset 4px 0 0 rgba(255, 128, 160, 0.84);
 }
 
 .task-category-creative,
-.calendar-category-creative {
-  border-color: rgba(208, 150, 255, 0.32);
-  background: rgba(208, 150, 255, 0.12);
+.calendar-category-creative,
+.spotlight-category-creative {
+  border-color: rgba(208, 150, 255, 0.38);
+  background: rgba(208, 150, 255, 0.14);
+  box-shadow: inset 4px 0 0 rgba(208, 150, 255, 0.84);
 }
 
 .task-category-garden,
-.calendar-category-garden {
-  border-color: rgba(105, 214, 145, 0.34);
-  background: rgba(105, 214, 145, 0.12);
+.calendar-category-garden,
+.spotlight-category-garden {
+  border-color: rgba(105, 214, 145, 0.4);
+  background: rgba(105, 214, 145, 0.14);
+  box-shadow: inset 4px 0 0 rgba(105, 214, 145, 0.84);
 }
 
 .task-category-work_skye,
-.calendar-category-work_skye {
-  border-color: rgba(255, 152, 120, 0.34);
-  background: rgba(255, 152, 120, 0.12);
+.calendar-category-work_skye,
+.spotlight-category-work_skye {
+  border-color: rgba(255, 152, 120, 0.4);
+  background: rgba(255, 152, 120, 0.14);
+  box-shadow: inset 4px 0 0 rgba(255, 152, 120, 0.86);
 }
 
 .task-category-project,
-.calendar-category-project {
-  border-color: rgba(150, 180, 255, 0.32);
-  background: rgba(150, 180, 255, 0.12);
+.calendar-category-project,
+.spotlight-category-project {
+  border-color: rgba(150, 180, 255, 0.38);
+  background: rgba(150, 180, 255, 0.14);
+  box-shadow: inset 4px 0 0 rgba(150, 180, 255, 0.84);
 }
 
 .task-category-general,
-.calendar-category-general {
-  border-color: rgba(181, 220, 189, 0.18);
-  background: rgba(255,255,255,0.05);
+.calendar-category-general,
+.spotlight-category-general {
+  border-color: rgba(181, 220, 189, 0.22);
+  background: rgba(255,255,255,0.06);
+  box-shadow: inset 4px 0 0 rgba(181, 220, 189, 0.46);
 }
 
 .calendar-list-item {
   border-width: 1px;
 }
 
-.pill.category-pill.child {
-  background: rgba(190, 149, 255, 0.18);
-  color: #eddcff;
-}
-
-.pill.category-pill.home {
-  background: rgba(125, 215, 154, 0.16);
-  color: #dff8e7;
-}
-
-.pill.category-pill.admin {
-  background: rgba(125, 174, 255, 0.16);
-  color: #dfeaff;
-}
-
-.pill.category-pill.errand {
-  background: rgba(255, 213, 124, 0.18);
-  color: #fff2cd;
-}
-
-.pill.category-pill.travel {
-  background: rgba(120, 216, 226, 0.18);
-  color: #defcff;
-}
-
-.pill.category-pill.fitness {
-  background: rgba(255, 128, 160, 0.18);
-  color: #ffe0ea;
-}
-
-.pill.category-pill.creative {
-  background: rgba(208, 150, 255, 0.18);
-  color: #f1deff;
-}
-
-.pill.category-pill.garden {
-  background: rgba(105, 214, 145, 0.18);
-  color: #def8e7;
-}
-
-.pill.category-pill.work_skye {
-  background: rgba(255, 152, 120, 0.18);
-  color: #ffe7de;
-}
-
-.pill.category-pill.project {
-  background: rgba(150, 180, 255, 0.18);
-  color: #e4ecff;
-}
-
-.pill.category-pill.general {
-  background: rgba(181, 220, 189, 0.12);
-  color: #e8f3ea;
-}
-
-.pill.category-pill.calendar-pill {
+.pill.category-pill.calendar-pill,
+.hero-pill.spotlight-pill {
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
 }
 
+.spotlight-category-card,
+.focus-category-block {
+  border: 1px solid rgba(181, 220, 189, 0.14);
+  border-radius: 16px;
+  padding: 0.78rem 0.86rem;
+}
+
+.focus-category-block .muted {
+  margin-top: 0.2rem;
+}
 .spotlight-secondary-list {
   display: grid;
   gap: 0.55rem;

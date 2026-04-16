@@ -2086,8 +2086,12 @@ function renderSpotlightCard(items) {
 
   const primary = spotlightItems[0];
   const badge = document.createElement('div');
-  badge.className = 'hero-pill';
+  badge.className = `hero-pill category-pill ${primary.categoryKey || 'general'} spotlight-pill`.trim();
   badge.textContent = primary.pill || 'Task';
+
+  if (primary.categoryKey) {
+    wrap.classList.add('spotlight-category-card', `spotlight-category-${primary.categoryKey}`);
+  }
 
   const title = document.createElement('div');
   title.className = 'focus-text';
@@ -2105,6 +2109,7 @@ function renderSpotlightCard(items) {
     spotlightItems.slice(1, 2).forEach((item) => {
       const row = document.createElement('div');
       row.className = 'spotlight-secondary-item';
+      if (item.categoryKey) row.classList.add('spotlight-category-card', `spotlight-category-${item.categoryKey}`);
       const rowTitle = document.createElement('div');
       rowTitle.className = 'spotlight-secondary-title';
       rowTitle.textContent = item.title;
@@ -2121,6 +2126,7 @@ function renderSpotlightCard(items) {
 
 function renderFocusBlock(item) {
   const wrap = document.createElement('div');
+  if (item?.categoryKey) wrap.classList.add('focus-category-block', `spotlight-category-${item.categoryKey}`);
   if (!item) {
     return buildEmptyState('Nothing is pressing right now.');
   }
