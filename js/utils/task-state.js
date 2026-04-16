@@ -38,8 +38,36 @@ function taskIsArchived(task) {
   return false;
 }
 
+
+
+function detectTaskField(sample, configKey) {
+  const configured = appState.config[configKey];
+  if (fieldExistsOnTask(configured, sample)) return configured;
+  const candidates = (window.HCC.constants && window.HCC.constants.TASK_FIELD_CANDIDATES && window.HCC.constants.TASK_FIELD_CANDIDATES[configKey]) || (typeof TASK_FIELD_CANDIDATES !== "undefined" ? TASK_FIELD_CANDIDATES[configKey] : []) || [];
+  return candidates.find((candidate) => fieldExistsOnTask(candidate, sample)) || configured;
+}
+
+function maybeAutoMapTaskFields(tasks) {
+  const sample = tasks?.[0];
+  if (!sample) return;
+  const updates = {};
+  const candidates = (window.HCC.constants && window.HCC.constants.TASK_FIELD_CANDIDATES) || (typeof TASK_FIELD_CANDIDATES !== "undefined" ? TASK_FIELD_CANDIDATES : {});
+  for (const key of Object.keys(candidates || {})) {
+    const detected = detectTaskField(sample, key);
+    if (detected && appState.config[key] !== detected) updates[key] = detected;
+  }
+  if (Object.keys(updates).length) {
+    Object.assign(appState.config, updates);
+    try { persistLocalConfig(); } catch {}
+    try { fillSettingsForm(); } catch {}
+    try { pushDevLog('info', `Auto-mapped task fields: ${Object.entries(updates).map(([k, v]) => `${k}→${v}`).join(', ')}`); } catch {}
+  }
+}
+
 window.HCC.utils = Object.assign(window.HCC.utils || {}, {
   fieldExistsOnTask,
+  detectTaskField,
+  maybeAutoMapTaskFields,
   taskIsCompleted,
   taskIsArchived,
 });
