@@ -5,11 +5,24 @@ HCC.tasks = HCC.tasks || {};
 HCC.tasks.inferCategory = function inferCategory(task) {
   const parts = [task?.tag, task?.title, task?.description].filter(Boolean).join(' ').toLowerCase();
   if (!parts) return 'general';
+  if (/(tor|torben|kindy|kindergarten|school|playgroup|play group|childcare|daycare|day care|preschool|pre-school|drop ?off|pickup|pick up|school run|lunchbox|backpack|excursion|parent.?teacher|teacher|classroom|uniform|nappies|diaper|nap time|story time)/.test(parts)) return 'child';
   if (/(laundry|clean|dishes|bins|trash|garbage|fold|dryer|washer|kitchen|bed)/.test(parts)) return 'home';
   if (/(call|email|book|schedule|appointment|meeting|doctor|dentist|paperwork|form|admin)/.test(parts)) return 'admin';
   if (/(buy|shop|shopping|pickup|pick up|store|grocer|grocery|pharmacy|post office|library|errand)/.test(parts)) return 'errand';
   if (/(school|daycare|kid|kids|hyrox|workout|gym|train|practice|trip|travel|pack)/.test(parts)) return 'planning';
   return 'general';
+};
+
+HCC.tasks.getCategoryLabel = function getCategoryLabel(category) {
+  const labels = {
+    child: 'Child',
+    home: 'Home',
+    admin: 'Admin',
+    errand: 'Errand',
+    planning: 'Planning',
+    general: 'Task',
+  };
+  return labels[category] || 'Task';
 };
 
 HCC.tasks.scoreTask = function scoreTask(task, context) {

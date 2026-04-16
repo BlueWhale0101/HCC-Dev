@@ -44,6 +44,10 @@ function buildListItem(item, options = {}) {
     row.dataset.owner = item.ownerKey;
     row.classList.add(`owner-${item.ownerKey}`);
   }
+  if (item?.categoryKey) {
+    row.dataset.category = item.categoryKey;
+    row.classList.add(`task-category-${item.categoryKey}`);
+  }
   if (item?.emphasis) row.dataset.emphasis = item.emphasis;
 
   const left = document.createElement('div');

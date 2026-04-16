@@ -390,6 +390,34 @@ body, button, .version-tag, .version-tag * {
   padding: 0.8rem 0.9rem;
 }
 
+#settings-dialog {
+  width: min(760px, calc(100vw - 1rem));
+  max-width: calc(100vw - 1rem);
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.settings-form,
+.settings-form section,
+.dialog-header,
+.dialog-actions {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.settings-form input,
+.settings-form select,
+.settings-form textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.settings-form textarea {
+  resize: vertical;
+}
+
 .dialog-header {
   display: flex;
   justify-content: space-between;
@@ -1519,6 +1547,78 @@ body.mobile-mode .topbar {
 
 .owner-shared {
   box-shadow: inset 3px 0 0 var(--owner-shared);
+}
+
+.task-category-child {
+  border-color: rgba(190, 149, 255, 0.22);
+  background: rgba(190, 149, 255, 0.06);
+}
+
+.task-category-home {
+  border-color: rgba(125, 215, 154, 0.18);
+  background: rgba(125, 215, 154, 0.05);
+}
+
+.task-category-admin {
+  border-color: rgba(125, 174, 255, 0.2);
+  background: rgba(125, 174, 255, 0.05);
+}
+
+.task-category-errand {
+  border-color: rgba(255, 213, 124, 0.2);
+  background: rgba(255, 213, 124, 0.06);
+}
+
+.task-category-planning {
+  border-color: rgba(255, 166, 125, 0.2);
+  background: rgba(255, 166, 125, 0.05);
+}
+
+.pill.category-pill.child {
+  background: rgba(190, 149, 255, 0.18);
+  color: #eddcff;
+}
+
+.pill.category-pill.home {
+  background: rgba(125, 215, 154, 0.16);
+  color: #dff8e7;
+}
+
+.pill.category-pill.admin {
+  background: rgba(125, 174, 255, 0.16);
+  color: #dfeaff;
+}
+
+.pill.category-pill.errand {
+  background: rgba(255, 213, 124, 0.18);
+  color: #fff2cd;
+}
+
+.pill.category-pill.planning {
+  background: rgba(255, 166, 125, 0.16);
+  color: #ffe7dc;
+}
+
+.spotlight-secondary-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+}
+
+.spotlight-secondary-item {
+  border: 1px solid rgba(181, 220, 189, 0.12);
+  background: rgba(255,255,255,0.03);
+  border-radius: 16px;
+  padding: 0.72rem 0.82rem;
+}
+
+.spotlight-secondary-title {
+  font-weight: 700;
+}
+
+.spotlight-secondary-meta {
+  margin-top: 0.15rem;
+  font-size: 0.92rem;
 }
 
 .pill {

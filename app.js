@@ -2058,25 +2058,45 @@ function renderTaskList(items, emptyText, options = {}) {
   return wrapper;
 }
 
-function renderSpotlightCard(item) {
+function renderSpotlightCard(items) {
   const wrap = document.createElement('div');
-  if (!item) {
+  const spotlightItems = Array.isArray(items) ? items.filter(Boolean) : (items ? [items] : []);
+  if (!spotlightItems.length) {
     return buildEmptyState('No standout task yet. Once the board has today or overdue work, it will appear here.');
   }
 
+  const primary = spotlightItems[0];
   const badge = document.createElement('div');
   badge.className = 'hero-pill';
-  badge.textContent = item.pill || 'Task';
+  badge.textContent = primary.pill || 'Task';
 
   const title = document.createElement('div');
   title.className = 'focus-text';
-  title.textContent = item.title;
+  title.textContent = primary.title;
 
   const meta = document.createElement('div');
   meta.className = 'muted';
-  meta.textContent = item.meta || '';
+  meta.textContent = primary.meta || '';
 
   wrap.append(badge, title, meta);
+
+  if (spotlightItems.length > 1) {
+    const secondaryWrap = document.createElement('div');
+    secondaryWrap.className = 'spotlight-secondary-list';
+    spotlightItems.slice(1, 2).forEach((item) => {
+      const row = document.createElement('div');
+      row.className = 'spotlight-secondary-item';
+      const rowTitle = document.createElement('div');
+      rowTitle.className = 'spotlight-secondary-title';
+      rowTitle.textContent = item.title;
+      const rowMeta = document.createElement('div');
+      rowMeta.className = 'spotlight-secondary-meta muted';
+      rowMeta.textContent = item.meta || '';
+      row.append(rowTitle, rowMeta);
+      secondaryWrap.append(row);
+    });
+    wrap.append(secondaryWrap);
+  }
   return wrap;
 }
 
@@ -3390,7 +3410,8 @@ function buildTaskDigest() {
   const tomorrowTaskItems = toDisplayTaskItems(tomorrowWindowTasks, 'Tomorrow');
   const todayBlend = blendTaskAndEventItems(todayTaskItems, calendarTodayItems, overdueTaskItems.slice(0, 2), 8);
 
-  const spotlightTask = rankedTodayTasks[0] || signals.map(signalToItem)[0] || undatedTasks[0] || null;
+  const spotlightTasks = toDisplayTaskItems(rankedTodayTasks.slice(0, 2), 'Task');
+  const spotlightTask = spotlightTasks[0] || signals.map(signalToItem)[0] || undatedTasks[0] || null;
 
   return {
     all: tasks,
@@ -3529,11 +3550,12 @@ function toDisplayTaskItems(tasks, fallbackPill = 'Task') {
       itemKey: `task:${task.id || task.title}`,
       title: task.title,
       meta: [owner, armed ? 'Ready to complete' : dueMeta].filter(Boolean).join(' · '),
-      pill: armed ? 'Ready' : (task.dueDate && task.dueDate < startOfDay(getNowDate()) ? 'Overdue' : task.dueDate && isSameDay(task.dueDate, getNowDate()) ? 'Today' : fallbackPill),
-      pillClass: armed ? 'warning' : (task.dueDate && task.dueDate < startOfDay(getNowDate()) ? 'danger' : ''),
+      pill: armed ? 'Ready' : (HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(task.category) : (task.dueDate && task.dueDate < startOfDay(getNowDate()) ? 'Overdue' : task.dueDate && isSameDay(task.dueDate, getNowDate()) ? 'Today' : fallbackPill)),
+      pillClass: `category-pill ${task.category || 'general'} ${armed ? 'warning' : (task.dueDate && task.dueDate < startOfDay(getNowDate()) ? 'danger' : '')}`.trim(),
       ownerKey: normalizeOwnerKey(owner),
+      categoryKey: task.category || 'general',
       emphasis: armed ? 'armed' : (task.dueDate && task.dueDate < startOfDay(getNowDate()) ? 'high' : task.dueDate && isSameDay(task.dueDate, getNowDate()) ? 'medium' : 'normal'),
-      rowClass: taskRowClass(task, armed),
+      rowClass: `${taskRowClass(task, armed)} task-category-${task.category || 'general'}`,
       actionHint: canComplete ? (armed ? 'Tap again to complete' : 'Tap once to arm completion') : '',
       onActivate: canComplete ? () => completeTask(task.raw || task) : null,
     };
