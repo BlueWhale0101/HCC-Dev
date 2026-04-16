@@ -17,6 +17,7 @@ let appState = {
   deviceKey: getOrCreateDeviceKey(),
   deviceProfile: null,
   tasks: [],
+  taskCategoryOverrides: loadTaskCategoryOverrides(),
   logs: [],
   signals: [],
   loads: [],
@@ -108,6 +109,104 @@ let appState = {
 };
 
 const screenEl = document.getElementById('screen');
+
+
+const TASK_CATEGORY_OVERRIDE_STORAGE_KEY = 'hcc-task-category-overrides';
+
+function loadTaskCategoryOverrides() {
+  try {
+    const raw = localStorage.getItem(TASK_CATEGORY_OVERRIDE_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveTaskCategoryOverrides() {
+  try {
+    localStorage.setItem(TASK_CATEGORY_OVERRIDE_STORAGE_KEY, JSON.stringify(appState.taskCategoryOverrides || {}));
+  } catch {}
+}
+
+function getTaskCategoryOverride(taskId) {
+  if (!taskId) return '';
+  return String((appState.taskCategoryOverrides || {})[taskId] || '').trim();
+}
+
+function setTaskCategoryOverride(taskId, category) {
+  if (!taskId) return;
+  const next = { ...(appState.taskCategoryOverrides || {}) };
+  const normalized = String(category || '').trim();
+  if (!normalized || normalized === 'auto') delete next[taskId];
+  else next[taskId] = normalized;
+  appState.taskCategoryOverrides = next;
+  saveTaskCategoryOverrides();
+}
+
+function openTaskCategoryOverrideModal(task) {
+  if (!task?.id) return;
+  const defs = Array.isArray(HCC?.tasks?.CATEGORY_DEFINITIONS) ? HCC.tasks.CATEGORY_DEFINITIONS : [];
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay signal-modal-overlay';
+  const panel = document.createElement('section');
+  panel.className = 'modal-panel signal-modal-panel';
+  const body = document.createElement('div');
+  body.className = 'mobile-stack signal-modal-form';
+  const currentOverride = getTaskCategoryOverride(task.id);
+  const inferred = HCC?.tasks?.inferCategory ? HCC.tasks.inferCategory({ ...task, manualCategory: '' }) : (task.category || 'general');
+  const draft = { value: currentOverride || 'auto' };
+
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) close();
+  });
+
+  const header = document.createElement('div');
+  header.className = 'signal-modal-header';
+  const title = document.createElement('div');
+  title.className = 'signal-modal-title';
+  title.textContent = 'Task category';
+  const subtitle = document.createElement('div');
+  subtitle.className = 'signal-modal-subtitle';
+  subtitle.textContent = task.title || 'Untitled task';
+  header.append(title, subtitle);
+
+  body.append(makeSelectField('Category override', [['auto', `Auto (inferred: ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(inferred) : inferred})`], ...defs.map((def) => [def.key, def.label])], draft.value, (value) => {
+    draft.value = value;
+  }));
+
+  const hint = document.createElement('div');
+  hint.className = 'muted';
+  hint.textContent = currentOverride
+    ? `Current override: ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(currentOverride) : currentOverride}. Switch back to Auto to clear it.`
+    : 'Overrides are local to this device for now. Auto uses the inferred category.';
+  body.append(hint);
+
+  const footer = document.createElement('div');
+  footer.className = 'signal-modal-footer';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'secondary-button';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', close);
+  const saveBtn = document.createElement('button');
+  saveBtn.type = 'button';
+  saveBtn.className = 'primary-button';
+  saveBtn.textContent = 'Save';
+  saveBtn.addEventListener('click', () => {
+    setTaskCategoryOverride(task.id, draft.value);
+    close();
+    showToast(draft.value === 'auto' ? 'Category override cleared' : `Category set to ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(draft.value) : draft.value}`);
+    renderMode();
+  });
+  footer.append(cancelBtn, saveBtn);
+
+  panel.append(header, body, footer);
+  overlay.append(panel);
+  document.body.append(overlay);
+}
 
 
 function updateServiceWorkerDiagnostics(patch = {}) {
@@ -1997,8 +2096,10 @@ function renderMobileDebug() {
     pillClass: `category-pill ${task.category || 'general'}`,
     categoryKey: task.category || 'general',
     rowClass: `task-list-item task-category-${task.category || 'general'}`,
+    actionHint: 'Tap to change category override',
+    onActivate: () => openTaskCategoryOverrideModal(task),
   }));
-  wrap.append(buildCard('Task category debug', 'Top normalized task classifications', renderTaskList(taskDebugItems, 'No tasks available.', { showPills: true }), 'mobile-compact-card'));
+  wrap.append(buildCard('Task category debug', 'Top normalized task classifications · tap a task to override', renderTaskList(taskDebugItems, 'No tasks available.', { showPills: true }), 'mobile-compact-card'));
 
   const eventDebugItems = [
     ...mapSnapshotItemsToDisplay(getSnapshotPayload(appState.config.calendarTodaySnapshotType)?.items || []),
@@ -3413,7 +3514,10 @@ function buildCategoryDebugMeta(item) {
   const candidates = Array.isArray(debug.candidateKeys) && debug.candidateKeys.length
     ? `candidates ${debug.candidateKeys.join(', ')}`
     : '';
-  return [debug.matchedRule, debug.matchedText ? `match ${debug.matchedText}` : '', confidence, candidates].filter(Boolean).join(' · ');
+  const inferred = debug.manualOverride && debug.inferredCategory
+    ? `inferred ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(debug.inferredCategory) : debug.inferredCategory}`
+    : '';
+  return [debug.matchedRule, debug.matchedText ? `match ${debug.matchedText}` : '', confidence, candidates, inferred].filter(Boolean).join(' · ');
 }
 
 function mapSnapshotItemsToDisplay(items = [], labelPrefix = '') {
@@ -3581,6 +3685,7 @@ function normalizeTaskRows() {
         description: task.description || '',
         panel: task.panel || '',
         raw: task,
+        manualCategory: getTaskCategoryOverride(task.id),
         kind: 'Task',
         createdAt: task.created_at || task.updated_at || '',
         sortScore: dueDate ? dueDate.getTime() : Number.MAX_SAFE_INTEGER,

@@ -1555,9 +1555,9 @@ body.mobile-mode .topbar {
 .task-category-child,
 .calendar-category-child,
 .spotlight-category-child {
-  border-color: rgba(190, 149, 255, 0.38);
-  background: rgba(190, 149, 255, 0.14);
-  box-shadow: inset 4px 0 0 rgba(190, 149, 255, 0.82);
+  border-color: rgba(176, 142, 248, 0.4);
+  background: rgba(176, 142, 248, 0.15);
+  box-shadow: inset 4px 0 0 rgba(176, 142, 248, 0.84);
 }
 
 .task-category-home,
@@ -1571,73 +1571,73 @@ body.mobile-mode .topbar {
 .task-category-admin,
 .calendar-category-admin,
 .spotlight-category-admin {
-  border-color: rgba(125, 174, 255, 0.36);
-  background: rgba(125, 174, 255, 0.13);
-  box-shadow: inset 4px 0 0 rgba(125, 174, 255, 0.8);
+  border-color: rgba(100, 165, 255, 0.38);
+  background: rgba(100, 165, 255, 0.13);
+  box-shadow: inset 4px 0 0 rgba(100, 165, 255, 0.82);
 }
 
 .task-category-errand,
 .calendar-category-errand,
 .spotlight-category-errand {
-  border-color: rgba(255, 213, 124, 0.36);
-  background: rgba(255, 213, 124, 0.14);
-  box-shadow: inset 4px 0 0 rgba(255, 213, 124, 0.84);
+  border-color: rgba(255, 198, 109, 0.36);
+  background: rgba(255, 198, 109, 0.14);
+  box-shadow: inset 4px 0 0 rgba(255, 198, 109, 0.84);
 }
 
 .task-category-travel,
 .calendar-category-travel,
 .spotlight-category-travel {
-  border-color: rgba(120, 216, 226, 0.38);
-  background: rgba(120, 216, 226, 0.14);
-  box-shadow: inset 4px 0 0 rgba(120, 216, 226, 0.84);
+  border-color: rgba(100, 219, 235, 0.4);
+  background: rgba(100, 219, 235, 0.14);
+  box-shadow: inset 4px 0 0 rgba(100, 219, 235, 0.86);
 }
 
 .task-category-fitness,
 .calendar-category-fitness,
 .spotlight-category-fitness {
-  border-color: rgba(255, 128, 160, 0.38);
-  background: rgba(255, 128, 160, 0.14);
-  box-shadow: inset 4px 0 0 rgba(255, 128, 160, 0.84);
+  border-color: rgba(255, 120, 145, 0.38);
+  background: rgba(255, 120, 145, 0.14);
+  box-shadow: inset 4px 0 0 rgba(255, 120, 145, 0.84);
 }
 
 .task-category-creative,
 .calendar-category-creative,
 .spotlight-category-creative {
-  border-color: rgba(208, 150, 255, 0.38);
-  background: rgba(208, 150, 255, 0.14);
-  box-shadow: inset 4px 0 0 rgba(208, 150, 255, 0.84);
+  border-color: rgba(224, 108, 212, 0.4);
+  background: rgba(224, 108, 212, 0.14);
+  box-shadow: inset 4px 0 0 rgba(224, 108, 212, 0.86);
 }
 
 .task-category-garden,
 .calendar-category-garden,
 .spotlight-category-garden {
-  border-color: rgba(105, 214, 145, 0.4);
-  background: rgba(105, 214, 145, 0.14);
-  box-shadow: inset 4px 0 0 rgba(105, 214, 145, 0.84);
+  border-color: rgba(38, 158, 90, 0.44);
+  background: rgba(38, 158, 90, 0.12);
+  box-shadow: inset 4px 0 0 rgba(38, 158, 90, 0.9);
 }
 
 .task-category-work_skye,
 .calendar-category-work_skye,
 .spotlight-category-work_skye {
-  border-color: rgba(255, 152, 120, 0.4);
-  background: rgba(255, 152, 120, 0.14);
-  box-shadow: inset 4px 0 0 rgba(255, 152, 120, 0.86);
+  border-color: rgba(255, 147, 111, 0.4);
+  background: rgba(255, 147, 111, 0.14);
+  box-shadow: inset 4px 0 0 rgba(255, 147, 111, 0.86);
 }
 
 .task-category-project,
 .calendar-category-project,
 .spotlight-category-project {
-  border-color: rgba(150, 180, 255, 0.38);
-  background: rgba(150, 180, 255, 0.14);
-  box-shadow: inset 4px 0 0 rgba(150, 180, 255, 0.84);
+  border-color: rgba(97, 140, 225, 0.4);
+  background: rgba(97, 140, 225, 0.13);
+  box-shadow: inset 4px 0 0 rgba(97, 140, 225, 0.86);
 }
 
 .task-category-general,
 .calendar-category-general,
 .spotlight-category-general {
-  border-color: rgba(181, 220, 189, 0.22);
-  background: rgba(255,255,255,0.06);
-  box-shadow: inset 4px 0 0 rgba(181, 220, 189, 0.46);
+  border-color: rgba(159, 174, 181, 0.24);
+  background: rgba(159, 174, 181, 0.08);
+  box-shadow: inset 4px 0 0 rgba(159, 174, 181, 0.5);
 }
 
 .calendar-list-item {
@@ -1659,6 +1659,15 @@ body.mobile-mode .topbar {
 .focus-category-block .muted {
   margin-top: 0.2rem;
 }
+
+.list-item-interactive::after {
+  content: '›';
+  align-self: center;
+  margin-left: 0.6rem;
+  color: rgba(233, 244, 235, 0.42);
+  font-size: 1.1rem;
+}
+
 .spotlight-secondary-list {
   display: grid;
   gap: 0.55rem;

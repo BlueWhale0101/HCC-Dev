@@ -19,7 +19,7 @@ HCC.tasks.CATEGORY_DEFINITIONS = [
       'tor', 'torben', 'boo', 'kindy', 'kindergarten', 'school run', 'toy library', 'playgroup', 'play group', 'daycare',
       'day care', 'childcare', 'child care', 'preschool', 'pre-school', 'dropoff', 'drop off', 'pickup', 'pick up',
       'lunchbox', 'backpack', 'uniform', 'teacher', 'classroom', 'class', 'playroom', 'toy', 'toys', 'kid', 'kids',
-      'child', 'children', 'birthday', 'drawing', 'drawings', 'grandparents', 'aquatic centre', 'swimming lessons',
+      'child', 'children', 'birthday', 'drawing', 'drawings', 'grandparents', 'swimming lessons',
       'swim lesson', 'travel cot'
     ],
   },
@@ -36,7 +36,7 @@ HCC.tasks.CATEGORY_DEFINITIONS = [
     label: 'Fitness',
     keywords: [
       'hyrox', 'crossfit', 'recovery session', 'workout', 'gym', 'training', 'train', 'race day', 'race', 'run',
-      'rowing', 'lift', 'lifting', 'exercise', 'session'
+      'rowing', 'lift', 'lifting', 'exercise', 'session', 'aquatic centre', 'swim', 'swimming', 'pool session'
     ],
   },
   {
@@ -110,15 +110,19 @@ HCC.tasks.CATEGORY_PRECEDENCE = [
 ];
 
 HCC.tasks.getCategorySearchParts = function getCategorySearchParts(item) {
-  return [
-    item?.tag,
-    item?.title,
-    item?.description,
-    item?.sourceLabel,
-    item?.location,
-    item?.calendarSummary,
-    item?.kind,
-  ].filter(Boolean).map((value) => String(value));
+  const parts = [];
+  if (item?.manualCategory) parts.push(`manual category ${item.manualCategory}`);
+  if (item?.tag) {
+    parts.push(String(item.tag));
+    parts.push(String(item.tag));
+  }
+  if (item?.title) parts.push(String(item.title));
+  if (item?.description) parts.push(String(item.description));
+  if (item?.sourceLabel) parts.push(String(item.sourceLabel));
+  if (item?.location) parts.push(String(item.location));
+  if (item?.calendarSummary) parts.push(String(item.calendarSummary));
+  if (item?.kind) parts.push(String(item.kind));
+  return parts;
 };
 
 HCC.tasks.normalizeCategoryHaystack = function normalizeCategoryHaystack(parts = []) {
@@ -215,6 +219,25 @@ HCC.tasks.inferCategoryDetails = function inferCategoryDetails(item = {}) {
 };
 
 HCC.tasks.applyCategoryMetadata = function applyCategoryMetadata(item = {}) {
+  const override = String(item?.manualCategory || item?.raw?.manual_category || item?.raw?.manualCategory || '').trim();
+  if (override && override !== 'auto') {
+    const label = HCC.tasks.getCategoryLabel ? HCC.tasks.getCategoryLabel(override) : override;
+    return {
+      ...item,
+      category: override,
+      categoryDebug: {
+        key: override,
+        label,
+        matchedRule: 'manual:override',
+        matchedText: override,
+        confidence: 1,
+        sourceText: HCC.tasks.getCategorySearchParts(item).join(' · '),
+        candidateKeys: [override],
+        manualOverride: true,
+        inferredCategory: HCC.tasks.inferCategoryDetails({ ...item, manualCategory: '' }).key,
+      },
+    };
+  }
   const details = HCC.tasks.inferCategoryDetails(item);
   return {
     ...item,
