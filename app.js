@@ -1443,11 +1443,16 @@ function renderMobileStatus(context) {
   ]);
 }
 
-function buildSecondaryButton(label, onClick) {
+function buildSecondaryButton(label, onClick, extraClass = '') {
   const button = document.createElement('button');
-  button.className = 'secondary-button';
+  button.type = 'button';
+  button.className = ['secondary-button', extraClass].filter(Boolean).join(' ');
   button.textContent = label;
-  button.addEventListener('click', onClick);
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof onClick === 'function') onClick(event);
+  });
   return button;
 }
 
@@ -3734,7 +3739,10 @@ function buildTaskDigest() {
   const todayBlend = blendTaskAndEventItems(todayTaskItems, calendarTodayItems, overdueTaskItems.slice(0, 2), 8);
 
   const spotlightTasks = toDisplayTaskItems(rankedTodayTasks.slice(0, 2), 'Task');
-  const spotlightTask = spotlightTasks[0] || signals.map(signalToItem)[0] || undatedTasks[0] || null;
+  const spotlightTask = spotlightTasks[0]
+    || signals.map(signalToItem)[0]
+    || (undatedTasks[0] ? toDisplayTaskItems([undatedTasks[0]], 'Task')[0] : null)
+    || null;
 
   return {
     all: tasks,
@@ -3750,7 +3758,7 @@ function buildTaskDigest() {
     calendarTodayItems,
     calendarTomorrowItems,
     allEventItems: [...calendarTodayItems, ...calendarTomorrowItems],
-    spotlightTask: spotlightTask ? toDisplayTaskItems([spotlightTask], spotlightTask.kind || 'Task')[0] : null,
+    spotlightTask,
     counts: {
       all: tasks.length,
       today: todayTasks.length,
