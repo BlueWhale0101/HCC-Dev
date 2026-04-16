@@ -2103,11 +2103,11 @@ body.mobile-mode .topbar.slim-topbar {
 }
 
 .widget-layout-laundry .card-header h2 {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
 }
 
 .widget-layout-laundry .card-subtitle {
-  font-size: 1rem;
+  font-size: 1.08rem;
 }
 
 .laundry-summary-redesign {
@@ -2115,7 +2115,7 @@ body.mobile-mode .topbar.slim-topbar {
 }
 
 .laundry-headline {
-  font-size: clamp(1.75rem, 3.8vw, 2.6rem);
+  font-size: clamp(1.95rem, 4.1vw, 2.85rem);
   line-height: 1.05;
   font-weight: 900;
   letter-spacing: -0.02em;
@@ -2123,7 +2123,7 @@ body.mobile-mode .topbar.slim-topbar {
 
 .laundry-start-button-large {
   min-height: 92px;
-  font-size: clamp(1.25rem, 2.8vw, 1.8rem);
+  font-size: clamp(1.38rem, 3.0vw, 1.95rem);
   font-weight: 800;
   border-radius: 22px;
 }
@@ -2142,12 +2142,12 @@ body.mobile-mode .topbar.slim-topbar {
 }
 
 .laundry-stat-large strong {
-  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-size: clamp(2.2rem, 4.3vw, 3rem);
   line-height: 0.95;
 }
 
 .laundry-stat-large span {
-  font-size: 1rem;
+  font-size: 1.12rem;
   line-height: 1.1;
 }
 
@@ -2165,7 +2165,7 @@ body.mobile-mode .topbar.slim-topbar {
 }
 
 .laundry-load-title-large {
-  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-size: clamp(1.5rem, 2.65vw, 2rem);
   line-height: 1.08;
   font-weight: 800;
 }
@@ -2178,19 +2178,19 @@ body.mobile-mode .topbar.slim-topbar {
 }
 
 .laundry-load-pill {
-  font-size: 1rem;
+  font-size: 1.1rem;
   padding: 0.32rem 0.75rem;
 }
 
 .laundry-load-cta-large {
-  font-size: clamp(1rem, 1.9vw, 1.2rem);
+  font-size: clamp(1.12rem, 2.05vw, 1.32rem);
   font-weight: 700;
   color: var(--text);
 }
 
 .laundry-load-meta-large,
 .laundry-empty-large {
-  font-size: clamp(1rem, 1.7vw, 1.15rem);
+  font-size: clamp(1.12rem, 1.9vw, 1.28rem);
 }
 
 @media (max-width: 720px) {
