@@ -1,6 +1,5 @@
 window.__hccBootState = window.__hccBootState || { started: false, finished: false, phase: 'script-loaded', version: APP_VERSION, errors: [] };
 window.__HCC_FORCE_BOOT = () => startBootstrap();
-const BOOT_TIMEOUT_MS = 8000;
 
 
 const INITIAL_CONFIG = loadConfig();
