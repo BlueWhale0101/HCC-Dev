@@ -2090,3 +2090,119 @@ body.mobile-mode .topbar.slim-topbar {
 .boot-debug-entry.log {
   border-left: 3px solid var(--accent);
 }
+
+
+/* v3.1.0 laundry redesign */
+.widget-layout-laundry {
+  max-width: 980px;
+  gap: 1rem;
+}
+
+.widget-layout-laundry .card {
+  padding: 1.2rem;
+}
+
+.widget-layout-laundry .card-header h2 {
+  font-size: 1.5rem;
+}
+
+.widget-layout-laundry .card-subtitle {
+  font-size: 1rem;
+}
+
+.laundry-summary-redesign {
+  gap: 1rem;
+}
+
+.laundry-headline {
+  font-size: clamp(1.75rem, 3.8vw, 2.6rem);
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.laundry-start-button-large {
+  min-height: 92px;
+  font-size: clamp(1.25rem, 2.8vw, 1.8rem);
+  font-weight: 800;
+  border-radius: 22px;
+}
+
+.laundry-summary-grid-large {
+  gap: 0.7rem;
+}
+
+.laundry-stat-large {
+  min-height: 100px;
+  padding: 0.9rem 1rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.laundry-stat-large strong {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 0.95;
+}
+
+.laundry-stat-large span {
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.laundry-load-list {
+  gap: 0.85rem;
+}
+
+.laundry-load-row-large {
+  padding: 1rem 1.05rem;
+  border-radius: 20px;
+}
+
+.laundry-load-main-large {
+  gap: 0.5rem;
+}
+
+.laundry-load-title-large {
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  line-height: 1.08;
+  font-weight: 800;
+}
+
+.laundry-load-status-line {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.laundry-load-pill {
+  font-size: 1rem;
+  padding: 0.32rem 0.75rem;
+}
+
+.laundry-load-cta-large {
+  font-size: clamp(1rem, 1.9vw, 1.2rem);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.laundry-load-meta-large,
+.laundry-empty-large {
+  font-size: clamp(1rem, 1.7vw, 1.15rem);
+}
+
+@media (max-width: 720px) {
+  .widget-layout-laundry .card {
+    padding: 1rem;
+  }
+
+  .laundry-start-button-large {
+    min-height: 84px;
+  }
+
+  .laundry-stat-large {
+    min-height: 88px;
+  }
+}

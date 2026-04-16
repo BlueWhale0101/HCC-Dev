@@ -20,7 +20,7 @@ const SURFACE_DEFINITIONS = {
   laundry: {
     bodyClasses: ['widget-surface', 'laundry-surface'],
     screenClass: 'screen single-column widget-layout widget-layout-laundry',
-    widgets: ['laundrySummary', 'laundryLoads', 'laundrySignals'],
+    widgets: ['laundrySummary', 'laundryLoads'],
   },
   bedroom: {
     bodyClasses: ['widget-surface', 'bedroom-surface'],

@@ -22,22 +22,43 @@ function loadNextStep(status) {
 
 function renderLaundrySummary() {
   const wrapper = document.createElement('div');
-  wrapper.className = 'laundry-summary';
+  wrapper.className = 'laundry-summary laundry-summary-redesign';
 
-  const counts = { washing: 0, drying: 0, ready: 0 };
-  for (const load of appState.loads) {
-    if (load.archived_at || load.status === 'done') continue;
-    if (counts[load.status] !== undefined) counts[load.status] += 1;
-  }
+  const activeLoads = [...appState.loads]
+    .filter((load) => !load.archived_at && load.status !== 'done')
+    .sort((a, b) => {
+      const byStatus = loadStatusRank(a.status) - loadStatusRank(b.status);
+      if (byStatus !== 0) return byStatus;
+      return new Date(a.last_transition_at || a.updated_at || a.created_at) - new Date(b.last_transition_at || b.updated_at || b.created_at);
+    });
+
+  const headline = document.createElement('div');
+  headline.className = 'laundry-headline';
+  headline.textContent = activeLoads.length
+    ? `${activeLoads.length} active load${activeLoads.length === 1 ? '' : 's'}`
+    : 'No active loads';
+  wrapper.append(headline);
 
   const addButton = document.createElement('button');
-  addButton.className = 'primary-button laundry-start-button';
-  addButton.textContent = 'Start new load';
+  addButton.className = 'primary-button laundry-start-button laundry-start-button-large';
+  addButton.textContent = 'Start New Load';
   addButton.addEventListener('click', () => createLoad(addButton));
   wrapper.append(addButton);
 
+  if (!activeLoads.length) {
+    const empty = document.createElement('div');
+    empty.className = 'laundry-empty-large muted';
+    empty.textContent = 'Nothing running right now.';
+    wrapper.append(empty);
+    return wrapper;
+  }
+
   const grid = document.createElement('div');
-  grid.className = 'laundry-summary-grid';
+  grid.className = 'laundry-summary-grid laundry-summary-grid-large';
+  const counts = { washing: 0, drying: 0, ready: 0 };
+  for (const load of activeLoads) {
+    if (counts[load.status] !== undefined) counts[load.status] += 1;
+  }
   const items = [
     ['Washing', counts.washing, 'washing'],
     ['Drying', counts.drying, 'drying'],
@@ -45,18 +66,12 @@ function renderLaundrySummary() {
   ];
   for (const [label, value, status] of items) {
     const chip = document.createElement('div');
-    chip.className = `laundry-stat status-${status}`;
-    chip.innerHTML = `<span>${label}</span><strong>${value}</strong>`;
+    chip.className = `laundry-stat laundry-stat-large status-${status}`;
+    chip.innerHTML = `<strong>${value}</strong><span>${label}</span>`;
     grid.append(chip);
   }
   wrapper.append(grid);
 
-  const hint = document.createElement('div');
-  hint.className = 'laundry-tip muted';
-  hint.textContent = counts.ready
-    ? 'A load is ready and may need folding.'
-    : 'Tap any load below to move it to the next step.';
-  wrapper.append(hint);
   return wrapper;
 }
 
@@ -107,7 +122,7 @@ function renderLaundrySignals() {
 
 function renderLaundryLoads() {
   const wrapper = document.createElement('div');
-  wrapper.className = 'list';
+  wrapper.className = 'list laundry-load-list';
 
   const loads = [...appState.loads]
     .filter((load) => !load.archived_at && load.status !== 'done')
@@ -119,21 +134,29 @@ function renderLaundryLoads() {
 
   if (!loads.length) {
     const empty = document.createElement('div');
-    empty.className = 'empty-state';
-    empty.textContent = 'No active loads right now.';
+    empty.className = 'empty-state laundry-empty-large';
+    empty.textContent = 'No loads in progress.';
     wrapper.append(empty);
     return wrapper;
   }
 
   for (const load of loads) {
     const row = document.createElement('button');
-    row.className = `load-row load-button status-${load.status}`;
+    row.className = `load-row load-button laundry-load-row-large status-${load.status}`;
+    const actionLabel = load.status === 'washing'
+      ? 'Tap to move to dryer'
+      : load.status === 'drying'
+      ? 'Tap to mark ready'
+      : 'Tap to mark done';
     row.innerHTML = `
-      <div class="load-row-main">
-        <div class="list-item-title">${escapeHtml(load.label || `Load ${load.id.slice(0, 4)}`)}</div>
-        <div class="list-item-meta">${loadNextStep(load.status)} · Last moved ${relativeTime(load.last_transition_at || load.updated_at || load.created_at)}</div>
+      <div class="load-row-main laundry-load-main-large">
+        <div class="list-item-title laundry-load-title-large">${escapeHtml(load.label || `Load ${load.id.slice(0, 4)}`)}</div>
+        <div class="laundry-load-status-line">
+          <span class="pill laundry-load-pill status-${load.status}">${escapeHtml(capitalize(load.status))}</span>
+          <span class="laundry-load-cta-large">${escapeHtml(actionLabel)}</span>
+        </div>
+        <div class="list-item-meta laundry-load-meta-large">Last moved ${relativeTime(load.last_transition_at || load.updated_at || load.created_at)}</div>
       </div>
-      <span class="pill">${escapeHtml(capitalize(load.status))}</span>
     `;
     row.addEventListener('click', () => advanceLoad(load, row));
     wrapper.append(row);
@@ -141,7 +164,6 @@ function renderLaundryLoads() {
 
   return wrapper;
 }
-
 
 function renderBedroomLaundry() {
   const wrapper = document.createElement('div');
