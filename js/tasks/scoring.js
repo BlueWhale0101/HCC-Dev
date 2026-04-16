@@ -5,7 +5,7 @@ HCC.tasks.CATEGORY_DEFINITIONS = [
   {
     key: 'work_skye',
     label: 'Skye Work',
-    pattern: /(skye work|photo paper|photo printer|portfolio|memory cards?|adobe( cloud)?|framing|mat boards?|photo(?:graphy|s)?|printer|archived photos?|luster|semigloss|frame(?:\b|ing))/,
+    pattern: /(skye work|photo paper|photo printer|portfolio|memory cards?|adobe( cloud)?|framing|mat boards?|photo(?:graphy|s)?|photo shoot|client gallery|editing session|printer|archived photos?|luster|semigloss|frame(?:\b|ing))/,
   },
   {
     key: 'child',
@@ -15,7 +15,7 @@ HCC.tasks.CATEGORY_DEFINITIONS = [
   {
     key: 'travel',
     label: 'Travel',
-    pattern: /(flight|flights|hotel|airbnb|airport|transfers?|transport|trip|travel|sydney|olympic park|reservation|book .*hotel|book .*flight|book .*airbnb)/,
+    pattern: /(flight|flights|hotel|airbnb|airport|transfers?|transport|trip|travel|sydney|olympic park|reservation|itinerary|boarding|book .*hotel|book .*flight|book .*airbnb)/,
   },
   {
     key: 'fitness',
@@ -30,7 +30,7 @@ HCC.tasks.CATEGORY_DEFINITIONS = [
   {
     key: 'creative',
     label: 'Creative',
-    pattern: /(opera|concert|woodwork(?:ing)?|reading|cricut|design(?:ing)?|tshirts?|t-shirts?|shirts?\b|great opera hits|opera house)/,
+    pattern: /(opera|concert|woodwork(?:ing)?|reading|cricut|design(?:ing)?|jazz|tshirts?|t-shirts?|shirts?\b|great opera hits|opera house)/,
   },
   {
     key: 'project',
@@ -54,20 +54,75 @@ HCC.tasks.CATEGORY_DEFINITIONS = [
   },
 ];
 
-HCC.tasks.inferCategory = function inferCategory(task) {
-  const parts = [task?.tag, task?.title, task?.description].filter(Boolean).join(' ').toLowerCase();
-  if (!parts) return 'general';
+HCC.tasks.getCategorySearchParts = function getCategorySearchParts(item) {
+  return [
+    item?.tag,
+    item?.title,
+    item?.description,
+    item?.sourceLabel,
+    item?.location,
+    item?.calendarSummary,
+  ].filter(Boolean).map((value) => String(value));
+};
+
+HCC.tasks.inferCategoryDetails = function inferCategoryDetails(item = {}) {
   const defs = HCC.tasks.CATEGORY_DEFINITIONS || [];
-  for (const def of defs) {
-    if (def.pattern && def.pattern.test(parts)) return def.key;
+  const searchParts = HCC.tasks.getCategorySearchParts(item);
+  const normalizedParts = searchParts.map((part) => part.toLowerCase());
+  const haystack = normalizedParts.join(' ').trim();
+
+  if (!haystack) {
+    return {
+      key: 'general',
+      label: HCC.tasks.getCategoryLabel ? HCC.tasks.getCategoryLabel('general') : 'General',
+      matchedRule: 'fallback:empty',
+      matchedText: '',
+      confidence: 0,
+      sourceText: searchParts.join(' · '),
+    };
   }
-  return 'general';
+
+  for (const def of defs) {
+    if (!def.pattern) continue;
+    const match = haystack.match(def.pattern);
+    if (!match) continue;
+    return {
+      key: def.key,
+      label: def.label,
+      matchedRule: `pattern:${def.key}`,
+      matchedText: match[0] || '',
+      confidence: 0.92,
+      sourceText: searchParts.join(' · '),
+    };
+  }
+
+  return {
+    key: 'general',
+    label: HCC.tasks.getCategoryLabel ? HCC.tasks.getCategoryLabel('general') : 'General',
+    matchedRule: 'fallback:general',
+    matchedText: '',
+    confidence: 0.2,
+    sourceText: searchParts.join(' · '),
+  };
+};
+
+HCC.tasks.applyCategoryMetadata = function applyCategoryMetadata(item = {}) {
+  const details = HCC.tasks.inferCategoryDetails(item);
+  return {
+    ...item,
+    category: details.key,
+    categoryDebug: details,
+  };
+};
+
+HCC.tasks.inferCategory = function inferCategory(item) {
+  return HCC.tasks.inferCategoryDetails(item).key;
 };
 
 HCC.tasks.getCategoryLabel = function getCategoryLabel(category) {
   const defs = HCC.tasks.CATEGORY_DEFINITIONS || [];
   const match = defs.find((item) => item.key === category);
-  return match?.label || 'Task';
+  return match?.label || 'General';
 };
 
 HCC.tasks.scoreTask = function scoreTask(task, context) {

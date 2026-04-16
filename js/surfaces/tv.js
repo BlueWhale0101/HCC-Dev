@@ -67,11 +67,7 @@ function buildTvHero() {
 function buildTvTodayItems(context) {
   const todaySnapshot = getSnapshotPayload(appState.config.calendarTodaySnapshotType);
   const eventItems = Array.isArray(todaySnapshot?.items)
-    ? todaySnapshot.items.slice(0, 3).map((item) => ({
-        title: item.title,
-        meta: [item.sourceLabel || 'Calendar', item.time].filter(Boolean).join(' · '),
-        pill: 'Calendar',
-      }))
+    ? mapSnapshotItemsToDisplay(todaySnapshot.items.slice(0, 3))
     : [];
 
   const taskItems = context.digest.todayTasks.slice(0, context.isEvening ? 2 : 3);
@@ -95,11 +91,7 @@ function buildBedroomPrimaryItems(context) {
   }
   const todaySnapshot = getSnapshotPayload(appState.config.calendarTodaySnapshotType);
   const eventItems = Array.isArray(todaySnapshot?.items)
-    ? todaySnapshot.items.slice(0, 3).map((item) => ({
-        title: item.title,
-        meta: [item.sourceLabel || 'Calendar', item.time].filter(Boolean).join(' · '),
-        pill: 'Calendar',
-      }))
+    ? mapSnapshotItemsToDisplay(todaySnapshot.items.slice(0, 3))
     : [];
   const taskItems = context.digest.todayTasks.slice(0, 4);
   const overdueItems = context.digest.overdueTasks.slice(0, 1);

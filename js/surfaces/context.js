@@ -10,13 +10,16 @@ function renderContextStack() {
       pillClass: snapshotFreshnessClass(weather),
     });
   }
-  const next = Array.isArray(todayCal?.payload?.items) ? todayCal.payload.items[0] : null;
+  const nextRaw = Array.isArray(todayCal?.payload?.items) ? todayCal.payload.items[0] : null;
+  const next = nextRaw ? normalizeDisplayCalendarItem(nextRaw) : null;
   if (next) {
     items.push({
       title: next.title,
       meta: [snapshotMetaLabel('Next event', todayCal), next.time, next.sourceLabel].filter(Boolean).join(' · '),
-      pill: snapshotFreshnessPill(todayCal, 'Calendar'),
-      pillClass: snapshotFreshnessClass(todayCal),
+      pill: HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(next.category) : snapshotFreshnessPill(todayCal, 'Calendar'),
+      pillClass: `category-pill ${next.category || 'general'} calendar-pill`,
+      categoryKey: next.category || 'general',
+      rowClass: `calendar-list-item calendar-category-${next.category || 'general'}`,
     });
   }
   return renderTaskList(items, 'Weather or calendar data is not connected yet.', { showPills: true });

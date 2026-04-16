@@ -1989,6 +1989,25 @@ function renderMobileDebug() {
     buildServiceWorkerDebugSummary(),
     buildWakeLockDebugSummary(),
   ], 'No diagnostics yet.', { showPills: true }), 'mobile-compact-card'));
+
+  const taskDebugItems = normalizeTaskRows().slice(0, 6).map((task) => ({
+    title: task.title,
+    meta: buildCategoryDebugMeta(task) || 'No category match detail',
+    pill: HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(task.category) : 'General',
+    pillClass: `category-pill ${task.category || 'general'}`,
+    categoryKey: task.category || 'general',
+    rowClass: `task-list-item task-category-${task.category || 'general'}`,
+  }));
+  wrap.append(buildCard('Task category debug', 'Top normalized task classifications', renderTaskList(taskDebugItems, 'No tasks available.', { showPills: true }), 'mobile-compact-card'));
+
+  const eventDebugItems = [
+    ...mapSnapshotItemsToDisplay(getSnapshotPayload(appState.config.calendarTodaySnapshotType)?.items || []),
+    ...mapSnapshotItemsToDisplay(getSnapshotPayload(appState.config.calendarTomorrowSnapshotType)?.items || [], 'Tomorrow'),
+  ].slice(0, 6).map((item) => ({
+    ...item,
+    meta: [item.meta, item.categoryDebug ? buildCategoryDebugMeta(item) : ''].filter(Boolean).join(' · '),
+  }));
+  wrap.append(buildCard('Event category debug', 'Snapshot event classifications', renderTaskList(eventDebugItems, 'No calendar events available.', { showPills: true }), 'mobile-compact-card'));
   return wrap;
 }
 
@@ -2815,13 +2834,18 @@ function formatCalendarEventTime(event) {
 }
 
 function normalizeCalendarEvent(event, account, calendar) {
-  return {
+  const normalized = {
     id: event.id,
     title: event.summary || '(Untitled event)',
     time: formatCalendarEventTime(event),
     sourceLabel: getCalendarSourceLabel(account, calendar),
     start: event.start?.dateTime || event.start?.date || '',
+    description: event.description || '',
+    location: event.location || '',
+    calendarSummary: calendar?.summary || calendar?.id || '',
+    kind: 'Calendar',
   };
+  return HCC?.tasks?.applyCategoryMetadata ? HCC.tasks.applyCategoryMetadata(normalized) : { ...normalized, category: 'general', categoryDebug: null };
 }
 
 function snapshotItemsSignature(items) {
@@ -2831,6 +2855,7 @@ function snapshotItemsSignature(items) {
     start: item.start || '',
     time: item.time || '',
     sourceLabel: item.sourceLabel || '',
+    category: item.category || '',
   })));
 }
 
@@ -2971,13 +2996,18 @@ function normalizeServerManagedCalendarPayload(payload, now = getNowDate()) {
     const starts = event?.start?.dateTime ? new Date(event.start.dateTime) : event?.start?.date ? new Date(`${event.start.date}T00:00:00`) : (event?.start ? new Date(event.start) : null);
     if (!starts || !Number.isFinite(starts.getTime())) continue;
     if (starts < todayStart || starts >= dayAfterStart) continue;
-    const normalized = {
+    const normalizedBase = {
       id: event.id || event.eventId || `${event.summary || event.title || 'event'}-${event.start?.dateTime || event.start?.date || event.start || ''}`,
       title: event.summary || event.title || '(Untitled event)',
       time: event.time || formatCalendarEventTime(event),
       sourceLabel: event.sourceLabel || event.calendarSummary || event.calendar?.summary || 'Calendar',
       start: event.start?.dateTime || event.start?.date || event.start || '',
+      description: event.description || '',
+      location: event.location || '',
+      calendarSummary: event.calendarSummary || event.calendar?.summary || '',
+      kind: 'Calendar',
     };
+    const normalized = HCC?.tasks?.applyCategoryMetadata ? HCC.tasks.applyCategoryMetadata(normalizedBase) : { ...normalizedBase, category: 'general', categoryDebug: null };
     if (isSameDay(starts, todayStart)) todayItems.push(normalized);
     else if (isSameDay(starts, tomorrowStart)) tomorrowItems.push(normalized);
   }
@@ -3357,14 +3387,43 @@ function rankTasksForWindow(tasks, options = {}) {
     });
 }
 
+function normalizeDisplayCalendarItem(item = {}) {
+  const base = {
+    ...item,
+    title: item.title || item.summary || '(Untitled event)',
+    sourceLabel: item.sourceLabel || item.calendarSummary || item.calendar?.summary || 'Calendar',
+    description: item.description || '',
+    location: item.location || '',
+    calendarSummary: item.calendarSummary || item.calendar?.summary || '',
+    kind: 'Calendar',
+  };
+  return HCC?.tasks?.applyCategoryMetadata ? HCC.tasks.applyCategoryMetadata(base) : { ...base, category: 'general', categoryDebug: null };
+}
+
+function buildCategoryDebugMeta(item) {
+  const debug = item?.categoryDebug;
+  if (!debug) return '';
+  const confidence = Number.isFinite(debug.confidence) ? `${Math.round(debug.confidence * 100)}%` : '';
+  return [debug.matchedRule, debug.matchedText ? `match ${debug.matchedText}` : '', confidence].filter(Boolean).join(' · ');
+}
+
 function mapSnapshotItemsToDisplay(items = [], labelPrefix = '') {
-  return items.map((item, index) => ({
-    id: item.id || item.eventId || item.uid || `${item.title || 'calendar'}-${item.time || index}`,
-    itemKey: `calendar:${item.id || item.eventId || item.uid || `${item.title || 'calendar'}-${item.time || index}`}`,
-    title: item.title,
-    meta: [item.sourceLabel || 'Calendar', labelPrefix && item.time ? `${labelPrefix} · ${item.time}` : labelPrefix || item.time].filter(Boolean).join(' · '),
-    pill: 'Calendar',
-  }));
+  return items.map((rawItem, index) => {
+    const item = normalizeDisplayCalendarItem(rawItem);
+    return {
+      id: item.id || item.eventId || item.uid || `${item.title || 'calendar'}-${item.time || index}`,
+      itemKey: `calendar:${item.id || item.eventId || item.uid || `${item.title || 'calendar'}-${item.time || index}`}`,
+      title: item.title,
+      meta: [item.sourceLabel || 'Calendar', labelPrefix && item.time ? `${labelPrefix} · ${item.time}` : labelPrefix || item.time].filter(Boolean).join(' · '),
+      pill: HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(item.category) : 'Calendar',
+      pillClass: `category-pill ${item.category || 'general'} calendar-pill`.trim(),
+      categoryKey: item.category || 'general',
+      rowClass: `calendar-list-item calendar-category-${item.category || 'general'}`,
+      categoryDebug: item.categoryDebug || null,
+      actionHint: buildCategoryDebugMeta(item),
+      kind: 'Calendar',
+    };
+  });
 }
 
 function selectTasksByDueBucket(tasks, dueBucketById, buckets) {
@@ -3518,8 +3577,7 @@ function normalizeTaskRows() {
         sortScore: dueDate ? dueDate.getTime() : Number.MAX_SAFE_INTEGER,
         isMine: owner ? String(owner).toLowerCase() === actor.toLowerCase() : false,
       };
-      normalizedTask.category = HCC?.tasks?.inferCategory ? HCC.tasks.inferCategory(normalizedTask) : 'general';
-      return normalizedTask;
+      return HCC?.tasks?.applyCategoryMetadata ? HCC.tasks.applyCategoryMetadata(normalizedTask) : { ...normalizedTask, category: 'general', categoryDebug: null };
     })
     .sort((a, b) => {
       if (a.sortScore !== b.sortScore) return a.sortScore - b.sortScore;
