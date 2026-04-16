@@ -633,6 +633,11 @@ code {
     right: 0.75rem;
     bottom: 0.75rem;
   }
+
+  .boot-debug-panel {
+    width: calc(100% - 1.5rem);
+    margin-top: 0.5rem;
+  }
 }
 
 .version-tag:focus, .version-tag:active { outline: none; }
@@ -2014,4 +2019,74 @@ body.mobile-mode .topbar.slim-topbar {
   .signal-summary-top {
     flex-wrap: wrap;
   }
+}
+
+
+.boot-debug-panel {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  margin: 0.75rem auto 0;
+  width: min(1280px, calc(100% - 2rem));
+  background: rgba(33, 10, 10, 0.96);
+  border: 1px solid rgba(255, 139, 139, 0.3);
+  border-radius: 18px;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.34);
+  padding: 0.9rem;
+  backdrop-filter: blur(6px);
+}
+
+.boot-debug-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.boot-debug-actions {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.boot-debug-status {
+  font-weight: 800;
+  color: #ffd1d1;
+  margin-bottom: 0.3rem;
+}
+
+.boot-debug-detail {
+  font-size: 0.92rem;
+  margin-bottom: 0.55rem;
+}
+
+.boot-debug-log {
+  display: grid;
+  gap: 0.4rem;
+  max-height: 30vh;
+  overflow: auto;
+}
+
+.boot-debug-entry {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  padding: 0.52rem 0.6rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  word-break: break-word;
+}
+
+.boot-debug-entry.warn {
+  border-left: 3px solid var(--warning);
+}
+
+.boot-debug-entry.error {
+  border-left: 3px solid var(--danger);
+}
+
+.boot-debug-entry.info,
+.boot-debug-entry.log {
+  border-left: 3px solid var(--accent);
 }

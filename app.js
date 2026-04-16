@@ -4966,12 +4966,22 @@ function setupDevConsole() {
     devConsoleLogEl.style.webkitUserSelect = 'text';
     devConsoleLogEl.style.webkitTouchCallout = 'default';
   }
-  const original = {
+  const consoleCapture = window.__hccConsoleCapture || null;
+  if (consoleCapture?.disabled) return;
+  const original = consoleCapture?.original || {
     log: console.log.bind(console),
     warn: console.warn.bind(console),
     error: console.error.bind(console),
     info: console.info.bind(console),
   };
+  if (consoleCapture) consoleCapture.disabled = true;
+  if (Array.isArray(consoleCapture?.logs) && consoleCapture.logs.length) {
+    devConsoleEntries = consoleCapture.logs.slice(0, DEV_CONSOLE_LIMIT).map((entry) => ({
+      time: entry.time || getNowDate().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }),
+      level: entry.level || 'info',
+      text: entry.text || '',
+    }));
+  }
 
   function capture(level, args) {
     const rendered = args.map(renderConsoleArg).join(' ');
@@ -4981,6 +4991,7 @@ function setupDevConsole() {
       text: rendered,
     });
     devConsoleEntries = devConsoleEntries.slice(0, DEV_CONSOLE_LIMIT);
+    try { window.__HCC_APPEND_BOOT_LOG && window.__HCC_APPEND_BOOT_LOG(level, '[' + String(level || 'info').toUpperCase() + '] ' + rendered); } catch {}
     renderDevConsole();
   }
 
@@ -5579,13 +5590,15 @@ function handleRuntimeActionError(prefix, error) {
 }
 
 function handleFatalStartupError(error) {
+  const detail = String(error?.message || error || 'Unknown startup error');
   try {
-    window.__hccBootState.errors.push(String(error?.message || error));
+    window.__hccBootState.errors.push(detail);
     window.__hccBootState.phase = 'fatal-startup-error';
+    window.__HCC_SHOW_BOOT_DEBUG && window.__HCC_SHOW_BOOT_DEBUG('Startup failed', detail, true);
   } catch {}
   console.error('Fatal startup error', error);
-  setStatus(`Startup error: ${error?.message || error}`);
-  renderEmptyShell('Startup failed. Long-press the version badge for diagnostics, then open Settings and verify your Supabase URL/key and field mapping.');
+  setStatus(`Startup error: ${detail}`);
+  renderEmptyShell('Startup failed. See the on-screen diagnostics below, or long-press the version badge for the full dev console. Then verify your Supabase URL, anon key, and field mapping.');
   renderDevConsole();
 }
 
