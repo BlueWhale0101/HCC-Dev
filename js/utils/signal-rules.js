@@ -45,6 +45,25 @@ function normalizeSignalRules(input) {
   };
 }
 
+
+
+function getEffectiveSignalRules() {
+  const shared = appState?.sharedConfig?.[SHARED_CONFIG_KEYS.signalRules];
+  if (shared && typeof shared === 'object') return normalizeSignalRules(shared);
+  if (appState?.signalRulesDraft) return normalizeSignalRules(appState.signalRulesDraft);
+  return normalizeSignalRules(DEFAULT_SIGNAL_RULES);
+}
+
+function persistSignalRulesDraft() {
+  appState.config.signalRulesDraft = normalizeSignalRules(appState.signalRulesDraft);
+  persistLocalConfig();
+}
+
+function setSignalRulesDraft(nextRules) {
+  appState.signalRulesDraft = normalizeSignalRules(nextRules);
+  persistSignalRulesDraft();
+}
+
 function formatHourLabel(hour) {
   const normalized = clampHour(hour, 0);
   const suffix = normalized >= 12 ? 'PM' : 'AM';
@@ -105,6 +124,9 @@ window.HCC.utils = Object.assign(window.HCC.utils || {}, {
   saveGoogleAuthRedirectState,
   consumeGoogleAuthRedirectState,
   normalizeSignalRules,
+  getEffectiveSignalRules,
+  persistSignalRulesDraft,
+  setSignalRulesDraft,
   formatHourLabel,
   createRuleId,
   normalizeCustomSignalRule,
