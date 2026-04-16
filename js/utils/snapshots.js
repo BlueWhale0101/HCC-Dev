@@ -31,6 +31,10 @@ function snapshotFreshnessClass(snapshot) {
   return getSnapshotFreshnessState(snapshot).pillClass;
 }
 
+function snapshotFreshnessPill(snapshot, fallback = 'Live') {
+  return getSnapshotFreshnessState(snapshot, fallback).pill;
+}
+
 function getFreshnessDescriptorFromAgeMs(ageMs, thresholds = {}) {
   const freshMs = Number(thresholds.freshMs || 0);
   const agingMs = Number(thresholds.agingMs || freshMs || 0);
@@ -45,5 +49,6 @@ window.HCC.utils = Object.assign(window.HCC.utils || {}, {
   describeSnapshotPublisher,
   snapshotStatusLevel,
   snapshotFreshnessClass,
+  snapshotFreshnessPill,
   getFreshnessDescriptorFromAgeMs,
 });
