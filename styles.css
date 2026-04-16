@@ -2375,3 +2375,182 @@ body.mobile-mode .topbar.slim-topbar {
     min-height: 88px;
   }
 }
+
+/* v3.3.0 bedroom first-pass minimal surface */
+body.bedroom-surface .topbar,
+body.bedroom-surface .version-tag {
+  display: none;
+}
+
+body.bedroom-surface .screen {
+  min-height: 100vh;
+}
+
+.bedroom-header-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.25rem 0.2rem 0.4rem;
+}
+
+.bedroom-header-left,
+.bedroom-header-right {
+  display: grid;
+  gap: 0.2rem;
+  align-items: center;
+}
+
+.bedroom-header-right {
+  justify-items: end;
+}
+
+.bedroom-header-date {
+  font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.bedroom-header-time {
+  font-size: clamp(1.5rem, 3.2vw, 2.3rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.bedroom-header-phase {
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.bedroom-status-pill {
+  border: 1px solid rgba(181, 220, 189, 0.16);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+  padding: 0.42rem 0.82rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.bedroom-status-pill.bedroom-status-ok {
+  border-color: rgba(125, 215, 154, 0.24);
+  background: rgba(125, 215, 154, 0.12);
+}
+
+.bedroom-status-pill.bedroom-status-aging {
+  border-color: rgba(255, 213, 124, 0.28);
+  background: rgba(255, 213, 124, 0.12);
+}
+
+.bedroom-status-pill.bedroom-status-degraded {
+  border-color: rgba(255, 139, 139, 0.28);
+  background: rgba(255, 139, 139, 0.12);
+}
+
+.widget-layout-bedroom {
+  gap: 1.1rem;
+}
+
+.widget-layout-bedroom .card {
+  min-height: 0;
+}
+
+.bedroom-best-next-card .card-header h2 {
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+}
+
+.bedroom-best-next-card .card-body {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.bedroom-best-next-card .focus-text {
+  font-size: clamp(1.4rem, 2.8vw, 2rem);
+  line-height: 1.18;
+}
+
+.bedroom-next-event-card .list-item,
+.bedroom-signal-card .list-item {
+  min-height: 5rem;
+}
+
+.bedroom-interactive-card {
+  cursor: pointer;
+}
+
+.bedroom-interactive-card:focus-visible {
+  outline: 2px solid rgba(125, 174, 255, 0.7);
+  outline-offset: 3px;
+}
+
+.bedroom-category-shell {
+  border-width: 1px;
+}
+
+.bedroom-signal-severity-warning {
+  border-color: rgba(255, 139, 139, 0.3);
+}
+
+.bedroom-signal-severity-notice {
+  border-color: rgba(255, 213, 124, 0.26);
+}
+
+.bedroom-detail-body {
+  display: grid;
+  gap: 1rem;
+}
+
+.bedroom-detail-hero,
+.bedroom-status-summary,
+.bedroom-status-section {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1rem;
+  background: rgba(255,255,255,0.03);
+}
+
+.bedroom-detail-top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+}
+
+.bedroom-detail-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 0.35rem;
+}
+
+.bedroom-detail-meta {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.bedroom-detail-hint {
+  margin-top: 0.65rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.bedroom-status-section-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+}
+
+.bedroom-status-summary-ok {
+  border-color: rgba(125, 215, 154, 0.22);
+  background: rgba(125, 215, 154, 0.08);
+}
+
+.bedroom-status-summary-aging {
+  border-color: rgba(255, 213, 124, 0.26);
+  background: rgba(255, 213, 124, 0.08);
+}
+
+.bedroom-status-summary-degraded {
+  border-color: rgba(255, 139, 139, 0.28);
+  background: rgba(255, 139, 139, 0.08);
+}

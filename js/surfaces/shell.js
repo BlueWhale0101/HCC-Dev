@@ -25,7 +25,7 @@ const SURFACE_DEFINITIONS = {
   bedroom: {
     bodyClasses: ['widget-surface', 'bedroom-surface'],
     screenClass: 'screen single-column bedroom-layout widget-layout widget-layout-bedroom',
-    widgets: ['context', 'bedroomPrimary', 'bedroomLaundry', 'bedroomForget'],
+    widgets: ['bedroomHeader', 'bedroomBestNext', 'bedroomNextEvent', 'bedroomSignal'],
   },
   mobile: {
     bodyClasses: ['mobile-surface'],
@@ -87,7 +87,7 @@ function renderModeLayout(mode, context) {
   screenEl.className = layout.screenClass;
   screenEl.replaceChildren();
 
-  const ambientFooter = mode !== 'mobile' ? buildAmbientFooter() : null;
+  const ambientFooter = (mode !== 'mobile' && mode !== 'bedroom') ? buildAmbientFooter() : null;
 
   if (mode === 'tv') {
     const tvWrap = document.createElement('div');
@@ -136,8 +136,111 @@ const WIDGETS = {
   laundrySummary: () => buildCard('Laundry Status', 'Tap a load to move it forward', renderLaundrySummary(), 'laundry-summary-card'),
   laundryLoads: () => buildCard('Loads In Progress', 'Washer, dryer, and ready-to-fold loads', renderLaundryLoads(), 'laundry-loads-card'),
   laundrySignals: () => buildCard('Laundry Signals', 'Useful reminders for the workflow', renderLaundrySignals(), 'laundry-signals-card'),
-  bedroomPrimary: (context) => buildCard(context.isEvening ? 'Tomorrow' : 'Today', describeDateContext(context), renderTaskList(buildBedroomPrimaryItems(context), `Nothing big for ${(context.isEvening ? 'tomorrow' : 'today')} yet.`, { showPills: true }), 'panel-card panel-today-card'),
-  bedroomLaundry: () => buildCard('Laundry', 'Quickly move loads forward', renderBedroomLaundry(), 'bedroom-laundry-card'),
-  bedroomForget: (context) => buildCard('Don’t Forget', 'Coming up soon', renderTaskList(context.forgetItems, 'No key reminders right now.', { showPills: true }), 'panel-card panel-reminders-card'),
+  bedroomHeader: () => buildBedroomHeaderStrip(),
+  bedroomBestNext: (context) => buildBedroomBestNextCard(context),
+  bedroomNextEvent: (context) => buildBedroomNextEventCard(context),
+  bedroomSignal: (context) => buildBedroomSignalCard(context),
   recentLogs: () => buildCard('Recent Logs', '', renderList(appState.logs.map(logToItem), 'No quick logs yet.')),
 };
+
+
+function buildBedroomHeaderStrip() {
+  const section = document.createElement('section');
+  section.className = 'bedroom-header-strip';
+
+  const left = document.createElement('div');
+  left.className = 'bedroom-header-left';
+
+  const date = document.createElement('div');
+  date.className = 'bedroom-header-date';
+  date.textContent = getNowDate().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+
+  const phase = document.createElement('div');
+  phase.className = 'bedroom-header-phase';
+  phase.textContent = isEvening() ? 'Tomorrow view' : 'Today view';
+
+  left.append(date, phase);
+
+  const right = document.createElement('div');
+  right.className = 'bedroom-header-right';
+
+  const timeEl = document.createElement('div');
+  timeEl.className = 'bedroom-header-time';
+  timeEl.textContent = getNowDate().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+  const health = getAmbientHealthState();
+  const statusButton = document.createElement('button');
+  statusButton.type = 'button';
+  statusButton.className = `bedroom-status-pill bedroom-status-${health.level}`;
+  statusButton.textContent = health.level === 'degraded' ? 'Needs attention' : health.level === 'aging' ? 'Slightly behind' : 'Healthy';
+  statusButton.setAttribute('aria-label', 'System status');
+  statusButton.title = 'Tap for trust details and version';
+  statusButton.addEventListener('click', () => {
+    if (typeof openBedroomStatusModal === 'function') openBedroomStatusModal();
+  });
+
+  right.append(timeEl, statusButton);
+  section.append(left, right);
+  return section;
+}
+
+function makeBedroomInteractiveCard(card, item, kind) {
+  if (!item) return card;
+  card.classList.add('bedroom-interactive-card');
+  card.setAttribute('role', 'button');
+  card.tabIndex = 0;
+  const open = () => {
+    if (typeof openBedroomItemModal === 'function') openBedroomItemModal(item, { kind });
+  };
+  card.addEventListener('click', (event) => {
+    event.preventDefault();
+    open();
+  });
+  card.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      open();
+    }
+  });
+  return card;
+}
+
+function buildBedroomBestNextCard(context) {
+  const primary = context?.digest?.spotlightTask || null;
+  const body = primary
+    ? renderSpotlightCard([primary])
+    : buildEmptyState(`Nothing big for ${context?.isEvening ? 'tomorrow' : 'today'} yet.`);
+  const subtitle = context?.isEvening ? 'Best thing to set up for tomorrow' : 'Best thing to do next';
+  const card = buildCard('Best Next', subtitle, body, 'panel-card bedroom-best-next-card');
+  if (primary?.categoryKey) card.classList.add('bedroom-category-shell', `spotlight-category-${primary.categoryKey}`);
+  return makeBedroomInteractiveCard(card, primary, 'task');
+}
+
+function selectBedroomNextEvent(context) {
+  const todayItems = context?.digest?.calendarTodayItems || [];
+  const tomorrowItems = context?.digest?.calendarTomorrowItems || [];
+  if (context?.isEvening && !todayItems.length) return tomorrowItems[0] || null;
+  return todayItems[0] || tomorrowItems[0] || null;
+}
+
+function buildBedroomNextEventCard(context) {
+  const nextEvent = selectBedroomNextEvent(context);
+  const subtitle = context?.isEvening ? 'Next thing on the calendar' : 'Coming up next';
+  const body = nextEvent
+    ? renderTaskList([{ ...nextEvent, actionHint: 'Open event details' }], 'No calendar items are loaded yet.', { showPills: true })
+    : buildEmptyState('Nothing on the calendar yet.');
+  const card = buildCard('Next Event', subtitle, body, 'panel-card bedroom-next-event-card');
+  if (nextEvent?.categoryKey) card.classList.add('bedroom-category-shell', `spotlight-category-${nextEvent.categoryKey}`);
+  return makeBedroomInteractiveCard(card, nextEvent, 'event');
+}
+
+function buildBedroomSignalCard(context) {
+  const topSignal = Array.isArray(context?.signals) ? context.signals[0] : null;
+  const signalItem = topSignal ? signalToItem(topSignal) : null;
+  const body = signalItem
+    ? renderTaskList([{ ...signalItem, actionHint: 'Open signal details' }], 'Nothing needs attention right now.', { showPills: true })
+    : buildEmptyState('Nothing needs attention right now.');
+  const card = buildCard('Signal', 'One thing to keep in mind', body, 'panel-card bedroom-signal-card');
+  if (topSignal?.severity) card.classList.add(`bedroom-signal-severity-${topSignal.severity}`);
+  return makeBedroomInteractiveCard(card, signalItem || topSignal, 'signal');
+}

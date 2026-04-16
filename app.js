@@ -3383,6 +3383,157 @@ function openQuickView(title, items, emptyText) {
   else dialog.setAttribute('open', 'open');
 }
 
+
+function openBedroomItemModal(item, options = {}) {
+  if (!item) return;
+  let dialog = document.getElementById('bedroom-detail-dialog');
+  if (!dialog) {
+    dialog = document.createElement('dialog');
+    dialog.id = 'bedroom-detail-dialog';
+    dialog.className = 'quick-view-dialog bedroom-detail-dialog';
+    dialog.innerHTML = `
+      <form method="dialog" class="quick-view-form settings-form bedroom-detail-form">
+        <div class="dialog-header">
+          <h2 id="bedroom-detail-title">Details</h2>
+          <button value="cancel" class="secondary-button">Close</button>
+        </div>
+        <div id="bedroom-detail-body" class="bedroom-detail-body"></div>
+      </form>
+    `;
+    document.body.append(dialog);
+  }
+
+  const kind = options.kind || item.kind || 'item';
+  dialog.querySelector('#bedroom-detail-title').textContent = kind === 'event'
+    ? 'Next Event'
+    : kind === 'signal'
+      ? 'Signal'
+      : 'Best Next';
+
+  const body = dialog.querySelector('#bedroom-detail-body');
+  body.replaceChildren();
+
+  const hero = document.createElement('section');
+  hero.className = `bedroom-detail-hero ${item.categoryKey ? `spotlight-category-${item.categoryKey}` : ''}`.trim();
+
+  const top = document.createElement('div');
+  top.className = 'bedroom-detail-top';
+  if (item.pill) top.append(buildPill(item.pill, item.pillClass || ''));
+  if (kind === 'task') {
+    const editButton = buildSecondaryButton('Change category', () => {
+      const task = appState.tasks.find((candidate) => candidate.id === item.id);
+      if (task) openTaskCategoryOverrideModal(task);
+    }, 'mini-button');
+    top.append(editButton);
+  }
+  hero.append(top);
+
+  const title = document.createElement('div');
+  title.className = 'bedroom-detail-title';
+  title.textContent = item.title || 'Untitled';
+  hero.append(title);
+
+  if (item.meta) {
+    const meta = document.createElement('div');
+    meta.className = 'bedroom-detail-meta';
+    meta.textContent = item.meta;
+    hero.append(meta);
+  }
+
+  if (item.actionHint) {
+    const hint = document.createElement('div');
+    hint.className = 'bedroom-detail-hint';
+    hint.textContent = item.actionHint;
+    hero.append(hint);
+  }
+
+  body.append(hero);
+
+  if (typeof dialog.showModal === 'function') dialog.showModal();
+  else dialog.setAttribute('open', 'open');
+}
+
+function openBedroomStatusModal() {
+  let dialog = document.getElementById('bedroom-status-dialog');
+  if (!dialog) {
+    dialog = document.createElement('dialog');
+    dialog.id = 'bedroom-status-dialog';
+    dialog.className = 'quick-view-dialog bedroom-status-dialog';
+    dialog.innerHTML = `
+      <form method="dialog" class="quick-view-form settings-form bedroom-detail-form">
+        <div class="dialog-header">
+          <h2>System status</h2>
+          <button value="cancel" class="secondary-button">Close</button>
+        </div>
+        <div id="bedroom-status-body" class="bedroom-detail-body"></div>
+      </form>
+    `;
+    document.body.append(dialog);
+  }
+
+  const body = dialog.querySelector('#bedroom-status-body');
+  body.replaceChildren();
+
+  const health = getAmbientHealthState();
+  const summary = document.createElement('section');
+  summary.className = `bedroom-status-summary bedroom-status-summary-${health.level}`;
+
+  const summaryTop = document.createElement('div');
+  summaryTop.className = 'bedroom-detail-top';
+  summaryTop.append(
+    buildPill(health.level === 'degraded' ? 'Degraded' : health.level === 'aging' ? 'Aging' : 'Healthy', health.level === 'degraded' ? 'warning' : health.level === 'aging' ? 'notice' : ''),
+    buildPill(`v${APP_VERSION || 'unknown'}`)
+  );
+  summary.append(summaryTop);
+
+  const summaryTitle = document.createElement('div');
+  summaryTitle.className = 'bedroom-detail-title';
+  summaryTitle.textContent = health.title || 'System status';
+  summary.append(summaryTitle);
+
+  const summaryMeta = document.createElement('div');
+  summaryMeta.className = 'bedroom-detail-meta';
+  summaryMeta.textContent = health.message || 'Live view is healthy.';
+  summary.append(summaryMeta);
+
+  body.append(summary);
+
+  const calendarState = getCalendarServiceState();
+  const weatherState = getWeatherServiceState();
+  const sections = [
+    {
+      title: 'Freshness',
+      items: getDataFreshnessItems(),
+      empty: 'No freshness data available yet.',
+    },
+    {
+      title: 'Calendar',
+      items: calendarState.items,
+      empty: 'No calendar accounts are connected yet.',
+    },
+    {
+      title: 'Weather',
+      items: weatherState.items.length
+        ? weatherState.items
+        : [{ title: weatherState.locationLabel, meta: 'Weather is not configured yet.', pill: 'Setup', pillClass: 'warning' }],
+      empty: 'No weather status available yet.',
+    },
+  ];
+
+  sections.forEach((sectionDef) => {
+    const card = document.createElement('section');
+    card.className = 'bedroom-status-section';
+    const titleEl = document.createElement('h3');
+    titleEl.className = 'bedroom-status-section-title';
+    titleEl.textContent = sectionDef.title;
+    card.append(titleEl, renderTaskList(sectionDef.items || [], sectionDef.empty, { showPills: true }));
+    body.append(card);
+  });
+
+  if (typeof dialog.showModal === 'function') dialog.showModal();
+  else dialog.setAttribute('open', 'open');
+}
+
 function buildCard(title, subtitle, body, extraClass = '') {
   const template = document.getElementById('card-template');
   const node = template.content.firstElementChild.cloneNode(true);
@@ -5034,7 +5185,13 @@ function setupWakeLockHooks() {
 function setupButtons() {
   pushDevLog('info', 'Button handlers attached.');
   settingsButton.onclick = openSettingsDialog;
-  if (trustIndicator) trustIndicator.onclick = () => { document.querySelector('.ambient-footer')?.scrollIntoView({ behavior: 'smooth', block: 'end' }); };
+  if (trustIndicator) trustIndicator.onclick = () => {
+    if (appState.config.mode === 'bedroom' && typeof openBedroomStatusModal === 'function') {
+      openBedroomStatusModal();
+      return;
+    }
+    document.querySelector('.ambient-footer')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  };
   refreshButton.onclick = async () => {
     try {
       await refreshAll('manual refresh button', { includeSlowState: true });
