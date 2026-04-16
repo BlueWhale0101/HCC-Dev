@@ -3410,7 +3410,10 @@ function buildCategoryDebugMeta(item) {
   const debug = item?.categoryDebug;
   if (!debug) return '';
   const confidence = Number.isFinite(debug.confidence) ? `${Math.round(debug.confidence * 100)}%` : '';
-  return [debug.matchedRule, debug.matchedText ? `match ${debug.matchedText}` : '', confidence].filter(Boolean).join(' · ');
+  const candidates = Array.isArray(debug.candidateKeys) && debug.candidateKeys.length
+    ? `candidates ${debug.candidateKeys.join(', ')}`
+    : '';
+  return [debug.matchedRule, debug.matchedText ? `match ${debug.matchedText}` : '', confidence, candidates].filter(Boolean).join(' · ');
 }
 
 function mapSnapshotItemsToDisplay(items = [], labelPrefix = '') {
