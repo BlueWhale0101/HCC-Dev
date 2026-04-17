@@ -275,13 +275,28 @@ HCC.ui.openBedroomStatusModal = function openBedroomStatusModal() {
   });
 
   const footerActions = document.createElement('div');
-  footerActions.className = 'bedroom-status-actions';
-  footerActions.append(buildSecondaryButton('Open dev console', () => {
+footerActions.className = 'bedroom-status-actions';
+
+footerActions.append(
+  buildSecondaryButton('Open settings', () => {
+    try { dialog.close(); } catch {}
+    if (typeof openSettingsDialog === 'function') {
+      openSettingsDialog();
+    } else {
+      showToast?.('Settings dialog function not found');
+    }
+  })
+);
+
+footerActions.append(
+  buildSecondaryButton('Open dev console', () => {
     try { dialog.close(); } catch {}
     if (typeof devConsoleEl !== 'undefined' && devConsoleEl) devConsoleEl.classList.remove('hidden');
     if (typeof renderDevConsole === 'function') renderDevConsole();
-  }));
-  body.append(footerActions);
+  })
+);
 
-  HCC.ui.showDialog(dialog);
+body.append(footerActions);
+
+HCC.ui.showDialog(dialog);
 };
