@@ -213,6 +213,18 @@ HCC.ui.openBedroomItemModal = function openBedroomItemModal(item, options = {}) 
 };
 
 
+
+function getSignalRuleEditTarget(signal) {
+  const metadata = signal?.metadata || {};
+  const rule = metadata.rule || metadata.ruleKind || '';
+  if (metadata.customRuleId) return { kind: 'custom', ruleId: metadata.customRuleId };
+  if (rule === 'custom_signal') return { kind: 'custom', ruleId: metadata.customRuleId || signal?.id || null };
+  if (rule === 'weekly_bins') return { kind: 'bins' };
+  if (rule === 'tomorrow_event_preview') return { kind: 'tomorrowEvent' };
+  if (rule === 'laundry_active') return { kind: 'laundry' };
+  return null;
+}
+
 HCC.ui.openSignalDetailModal = function openSignalDetailModal(signal) {
   if (!signal) return;
   const dialog = HCC.ui.ensureDialog('signal-detail-dialog', 'quick-view-dialog bedroom-detail-dialog signal-detail-dialog', `
@@ -253,6 +265,18 @@ HCC.ui.openSignalDetailModal = function openSignalDetailModal(signal) {
 
   const actions = document.createElement('div');
   actions.className = 'signal-modal-footer';
+  const editTarget = getSignalRuleEditTarget(signal);
+  if (editTarget && typeof openSignalRuleModal === 'function') {
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'secondary-button';
+    editBtn.textContent = 'Edit rule';
+    editBtn.addEventListener('click', () => {
+      dialog.close();
+      openSignalRuleModal(editTarget.kind, { mode: 'edit', ruleId: editTarget.ruleId || null, isNew: false });
+    });
+    actions.append(editBtn);
+  }
   const snoozeBtn = document.createElement('button');
   snoozeBtn.type = 'button';
   snoozeBtn.className = 'secondary-button';

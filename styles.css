@@ -392,6 +392,7 @@ body, button, .version-tag, .version-tag * {
 
 #settings-dialog {
   width: min(760px, calc(100vw - 1rem));
+  margin: auto;
   max-width: calc(100vw - 1rem);
   padding: 0;
   border: none;
@@ -866,6 +867,39 @@ body.version-pressing, body.version-pressing * {
 }
 
 
+
+
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+  background: rgba(0, 0, 0, 0.58);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-panel {
+  width: min(760px, calc(100vw - 2rem));
+  max-height: min(88vh, 920px);
+  overflow: auto;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  background: #122219;
+  color: var(--text);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+  padding: 1rem;
+}
+
+.signal-modal-panel {
+  width: min(760px, calc(100vw - 2rem));
+}
+
+.signal-modal-overlay {
+  backdrop-filter: blur(2px);
+}
 
 .quick-view-dialog::backdrop {
   background: rgba(0, 0, 0, 0.55);

@@ -4,7 +4,6 @@ const SURFACE_DEFINITIONS = {
     screenClass: 'screen two-columns widget-layout widget-layout-kitchen',
     widgets: [
       'kitchenHeader',
-      'quickActions',
       'kitchenBestNext',
       'kitchenEvents',
       'kitchenTodayTasks',

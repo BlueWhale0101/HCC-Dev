@@ -187,6 +187,7 @@ function renderMobileControlPanel(context) {
     btn.className = `mobile-tab-button ${appState.mobileTab === key ? 'active' : ''}`.trim();
     btn.textContent = label;
     btn.addEventListener('click', () => {
+      if (typeof closeTransientOverlays === 'function') closeTransientOverlays();
       appState.mobileTab = key;
       renderMode();
     });

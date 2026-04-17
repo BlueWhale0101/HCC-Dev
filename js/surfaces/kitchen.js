@@ -49,7 +49,7 @@ HCC.surfaces.kitchen.buildTodayTasksCard = function buildTodayTasksCard(context)
 
 HCC.surfaces.kitchen.buildSignalsCard = function buildSignalsCard(context) {
   const count = (context.signals || []).length;
-  return buildCard('Signals', count ? `${count} visible · swipe for detail` : 'Everything looks calm right now.', renderSignalActionList((context.signals || []).slice(0, 6), 'Everything looks calm right now.'), 'kitchen-signals-card panel-card panel-signals-card');
+  return buildCard('Needs Attention', count ? `${count} visible · tap to arm · swipe for detail` : 'Everything looks calm right now.', renderSignalActionList((context.signals || []).slice(0, 6), 'Everything looks calm right now.'), 'kitchen-signals-card panel-card panel-signals-card');
 };
 
 HCC.surfaces.kitchen.buildUpcomingCard = function buildUpcomingCard(context) {
