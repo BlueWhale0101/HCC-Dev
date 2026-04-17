@@ -31,5 +31,6 @@ HCC.display.buildCategoryDebugMeta = function buildCategoryDebugMeta(item) {
   const inferred = debug.manualOverride && debug.inferredCategory
     ? `inferred ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(debug.inferredCategory) : debug.inferredCategory}`
     : '';
-  return [debug.matchedRule, debug.matchedText ? `match ${debug.matchedText}` : '', confidence, candidates, inferred].filter(Boolean).join(' · ');
+  const override = debug.manualOverride ? 'manual override' : '';
+  return [override, debug.matchedRule, debug.matchedText ? `match ${debug.matchedText}` : '', confidence, candidates, inferred].filter(Boolean).join(' · ');
 };

@@ -2037,9 +2037,9 @@ function renderMobileDebug() {
 
   const taskDebugItems = normalizeTaskRows().slice(0, 6).map((task) => ({
     title: task.title,
-    meta: buildCategoryDebugMeta(task) || 'No category match detail',
+    meta: [task?.categoryDebug?.manualOverride ? 'Manual override active' : '', buildCategoryDebugMeta(task) || 'No category match detail'].filter(Boolean).join(' · '),
     pill: HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(task.category) : 'General',
-    pillClass: `category-pill ${task.category || 'general'}`,
+    pillClass: `category-pill ${task.category || 'general'}${task?.categoryDebug?.manualOverride ? ' override-pill' : ''}`,
     categoryKey: task.category || 'general',
     rowClass: `task-list-item task-category-${task.category || 'general'}`,
     actionHint: 'Tap to change category override',

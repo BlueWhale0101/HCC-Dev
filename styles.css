@@ -1475,7 +1475,7 @@ body.mobile-mode .topbar {
 }
 
 .panel-signals-card::before { background: rgba(255, 213, 124, 0.34); }
-.panel-today-card::before { background: rgba(125, 215, 154, 0.34); }
+.panel-today-card::before { background: rgba(135, 228, 170, 0.34); }
 .panel-reminders-card::before,
 .panel-upcoming-card::before { background: rgba(125, 174, 255, 0.28); }
 
@@ -1555,25 +1555,25 @@ body.mobile-mode .topbar {
 .task-category-child,
 .calendar-category-child,
 .spotlight-category-child {
-  border-color: rgba(176, 142, 248, 0.4);
-  background: rgba(176, 142, 248, 0.15);
-  box-shadow: inset 4px 0 0 rgba(176, 142, 248, 0.84);
+  border-color: rgba(170, 145, 255, 0.4);
+  background: rgba(170, 145, 255, 0.15);
+  box-shadow: inset 4px 0 0 rgba(170, 145, 255, 0.84);
 }
 
 .task-category-home,
 .calendar-category-home,
 .spotlight-category-home {
-  border-color: rgba(125, 215, 154, 0.34);
-  background: rgba(125, 215, 154, 0.13);
-  box-shadow: inset 4px 0 0 rgba(125, 215, 154, 0.78);
+  border-color: rgba(135, 228, 170, 0.34);
+  background: rgba(135, 228, 170, 0.14);
+  box-shadow: inset 4px 0 0 rgba(135, 228, 170, 0.8);
 }
 
 .task-category-admin,
 .calendar-category-admin,
 .spotlight-category-admin {
-  border-color: rgba(100, 165, 255, 0.38);
-  background: rgba(100, 165, 255, 0.13);
-  box-shadow: inset 4px 0 0 rgba(100, 165, 255, 0.82);
+  border-color: rgba(98, 184, 255, 0.38);
+  background: rgba(98, 184, 255, 0.13);
+  box-shadow: inset 4px 0 0 rgba(98, 184, 255, 0.82);
 }
 
 .task-category-errand,
@@ -1587,9 +1587,9 @@ body.mobile-mode .topbar {
 .task-category-travel,
 .calendar-category-travel,
 .spotlight-category-travel {
-  border-color: rgba(100, 219, 235, 0.4);
-  background: rgba(100, 219, 235, 0.14);
-  box-shadow: inset 4px 0 0 rgba(100, 219, 235, 0.86);
+  border-color: rgba(84, 235, 255, 0.4);
+  background: rgba(84, 235, 255, 0.14);
+  box-shadow: inset 4px 0 0 rgba(84, 235, 255, 0.86);
 }
 
 .task-category-fitness,
@@ -1603,17 +1603,17 @@ body.mobile-mode .topbar {
 .task-category-creative,
 .calendar-category-creative,
 .spotlight-category-creative {
-  border-color: rgba(224, 108, 212, 0.4);
-  background: rgba(224, 108, 212, 0.14);
-  box-shadow: inset 4px 0 0 rgba(224, 108, 212, 0.86);
+  border-color: rgba(230, 92, 194, 0.4);
+  background: rgba(230, 92, 194, 0.14);
+  box-shadow: inset 4px 0 0 rgba(230, 92, 194, 0.86);
 }
 
 .task-category-garden,
 .calendar-category-garden,
 .spotlight-category-garden {
-  border-color: rgba(38, 158, 90, 0.44);
-  background: rgba(38, 158, 90, 0.12);
-  box-shadow: inset 4px 0 0 rgba(38, 158, 90, 0.9);
+  border-color: rgba(5, 95, 42, 0.44);
+  background: rgba(5, 95, 42, 0.16);
+  box-shadow: inset 4px 0 0 rgba(5, 95, 42, 0.9);
 }
 
 .task-category-work_skye,
@@ -1627,17 +1627,17 @@ body.mobile-mode .topbar {
 .task-category-project,
 .calendar-category-project,
 .spotlight-category-project {
-  border-color: rgba(97, 140, 225, 0.4);
-  background: rgba(97, 140, 225, 0.13);
-  box-shadow: inset 4px 0 0 rgba(97, 140, 225, 0.86);
+  border-color: rgba(60, 95, 185, 0.42);
+  background: rgba(60, 95, 185, 0.15);
+  box-shadow: inset 4px 0 0 rgba(60, 95, 185, 0.88);
 }
 
 .task-category-general,
 .calendar-category-general,
 .spotlight-category-general {
-  border-color: rgba(159, 174, 181, 0.24);
-  background: rgba(159, 174, 181, 0.08);
-  box-shadow: inset 4px 0 0 rgba(159, 174, 181, 0.5);
+  border-color: rgba(146, 154, 160, 0.22);
+  background: rgba(146, 154, 160, 0.08);
+  box-shadow: inset 4px 0 0 rgba(146, 154, 160, 0.48);
 }
 
 .calendar-list-item {
@@ -1701,6 +1701,25 @@ body.mobile-mode .topbar {
   background: rgba(125, 174, 255, 0.14);
   color: #cfe0ff;
 }
+.pill.override-pill {
+  position: relative;
+  padding-right: 1rem;
+}
+
+.pill.override-pill::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0.44rem;
+  width: 0.36rem;
+  height: 0.36rem;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.9;
+  transform: translateY(-50%);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08);
+}
+
 
 .signal-severity-warning {
   background: rgba(255, 213, 124, 0.07);

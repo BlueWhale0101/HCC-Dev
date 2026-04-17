@@ -179,6 +179,7 @@ HCC.ui.openBedroomItemModal = function openBedroomItemModal(item, options = {}) 
   const top = document.createElement('div');
   top.className = 'bedroom-detail-top';
   if (item.pill) top.append(buildPill(item.pill, item.pillClass || ''));
+  if (item?.categoryDebug?.manualOverride) top.append(buildPill('Manual', 'notice'));
   if (kind === 'task') {
     const editButton = buildSecondaryButton('Change category', () => {
       const task = normalizeTaskRows().find((candidate) => candidate.id === item.id) || appState.tasks.find((candidate) => candidate.id === item.id);

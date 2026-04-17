@@ -54,6 +54,7 @@ HCC.display.mapSnapshotItemsToDisplay = function mapSnapshotItemsToDisplay(items
 HCC.display.toTaskDisplayItem = function toTaskDisplayItem(task = {}, fallbackPill = 'Task') {
   if (task.signal_type || task.severity) return signalToItem(task);
   const effectiveCategory = HCC.display.getCategoryKey(task);
+  const manualOverride = !!task?.categoryDebug?.manualOverride;
   const dueMeta = task.dueDate ? formatTaskTiming(task.dueDate) : (task.dueText || 'No due date');
   const owner = task.owner || '';
   const canComplete = !!task.id && !pendingTaskCompletions.has(task.id);
@@ -62,14 +63,15 @@ HCC.display.toTaskDisplayItem = function toTaskDisplayItem(task = {}, fallbackPi
     id: task.id,
     itemKey: `task:${task.id || task.title}`,
     title: task.title,
-    meta: [owner, armed ? 'Ready to complete' : dueMeta].filter(Boolean).join(' · '),
+    meta: [owner, armed ? 'Ready to complete' : dueMeta, manualOverride ? 'Manual category' : ''].filter(Boolean).join(' · '),
     pill: armed ? 'Ready' : HCC.display.getCategoryLabel({ effectiveCategory }),
-    pillClass: ['category-pill', effectiveCategory, armed ? 'warning' : (task.dueDate && task.dueDate < startOfDay(getNowDate()) ? 'danger' : '')].filter(Boolean).join(' ').trim(),
+    pillClass: ['category-pill', effectiveCategory, manualOverride ? 'override-pill' : '', armed ? 'warning' : (task.dueDate && task.dueDate < startOfDay(getNowDate()) ? 'danger' : '')].filter(Boolean).join(' ').trim(),
     ownerKey: normalizeOwnerKey(owner),
     category: effectiveCategory,
     categoryKey: effectiveCategory,
     effectiveCategory,
     categoryDebug: task.categoryDebug || null,
+    manualOverride,
     emphasis: armed ? 'armed' : (task.dueDate && task.dueDate < startOfDay(getNowDate()) ? 'high' : task.dueDate && isSameDay(task.dueDate, getNowDate()) ? 'medium' : 'normal'),
     rowClass: `${taskRowClass(task, armed)} ${HCC.display.getCategoryRowClass('task-category', { effectiveCategory })}`.trim(),
     actionHint: canComplete ? (armed ? 'Tap again to complete' : 'Tap once to arm completion') : '',
