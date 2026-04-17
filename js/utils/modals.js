@@ -212,6 +212,73 @@ HCC.ui.openBedroomItemModal = function openBedroomItemModal(item, options = {}) 
   HCC.ui.showDialog(dialog);
 };
 
+
+HCC.ui.openSignalDetailModal = function openSignalDetailModal(signal) {
+  if (!signal) return;
+  const dialog = HCC.ui.ensureDialog('signal-detail-dialog', 'quick-view-dialog bedroom-detail-dialog signal-detail-dialog', `
+    <form method="dialog" class="quick-view-form settings-form bedroom-detail-form">
+      <div class="dialog-header">
+        <h2>Signal</h2>
+        <button value="cancel" class="secondary-button" type="button" data-close-dialog="true">Close</button>
+      </div>
+      <div id="signal-detail-body" class="bedroom-detail-body"></div>
+    </form>
+  `);
+
+  const closeBtn = dialog.querySelector('[data-close-dialog="true"]');
+  if (closeBtn) closeBtn.onclick = () => dialog.close();
+
+  const body = dialog.querySelector('#signal-detail-body');
+  body.replaceChildren();
+
+  const item = signalToItem(signal);
+  const hero = document.createElement('section');
+  hero.className = 'bedroom-detail-hero';
+
+  const top = document.createElement('div');
+  top.className = 'bedroom-detail-top';
+  if (item.pill) top.append(buildPill(item.pill, item.pillClass || ''));
+  hero.append(top);
+
+  const title = document.createElement('div');
+  title.className = 'bedroom-detail-title';
+  title.textContent = signal.title || 'Signal';
+  hero.append(title);
+
+  const meta = document.createElement('div');
+  meta.className = 'bedroom-detail-meta';
+  meta.textContent = [signal.description, signal.location, signal.expires_at ? `Expires ${relativeTime(signal.expires_at)}` : ''].filter(Boolean).join(' · ') || 'Active household signal';
+  hero.append(meta);
+  body.append(hero);
+
+  const actions = document.createElement('div');
+  actions.className = 'signal-modal-footer';
+  const snoozeBtn = document.createElement('button');
+  snoozeBtn.type = 'button';
+  snoozeBtn.className = 'secondary-button';
+  snoozeBtn.textContent = 'Snooze 1h';
+  snoozeBtn.addEventListener('click', () => {
+    snoozeSignal(signal, 60);
+    dialog.close();
+  });
+  actions.append(snoozeBtn);
+
+  if (!signal?.metadata?.synthetic) {
+    const dismissBtn = document.createElement('button');
+    dismissBtn.type = 'button';
+    dismissBtn.className = 'primary-button';
+    dismissBtn.textContent = 'Dismiss';
+    dismissBtn.addEventListener('click', async () => {
+      await dismissSignal(signal);
+      dialog.close();
+    });
+    actions.append(dismissBtn);
+  }
+
+  body.append(actions);
+  HCC.ui.showDialog(dialog);
+};
+
 HCC.ui.openBedroomStatusModal = function openBedroomStatusModal() {
   const dialog = HCC.ui.ensureDialog('bedroom-status-dialog', 'quick-view-dialog bedroom-status-dialog', `
     <form method="dialog" class="quick-view-form settings-form bedroom-detail-form">

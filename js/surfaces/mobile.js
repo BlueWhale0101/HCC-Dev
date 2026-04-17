@@ -39,6 +39,7 @@ function buildListItem(item, options = {}) {
   const rowTag = options.tagName || 'div';
   const row = document.createElement(rowTag);
   row.className = options.rowClassName || 'list-item';
+  let didSwipe = false;
   if (item?.rowClass) row.classList.add(...String(item.rowClass).split(/\s+/).filter(Boolean));
   if (item?.ownerKey) {
     row.dataset.owner = item.ownerKey;
@@ -77,6 +78,11 @@ function buildListItem(item, options = {}) {
     row.style.cursor = 'pointer';
     if (item.actionHint) row.title = item.actionHint;
     row.addEventListener('click', (event) => {
+      if (didSwipe) {
+        didSwipe = false;
+        event.preventDefault();
+        return;
+      }
       event.preventDefault();
       options.onActivate(event);
     });
@@ -86,6 +92,59 @@ function buildListItem(item, options = {}) {
         options.onActivate(event);
       }
     });
+  }
+
+  if (typeof options.onSwipe === 'function') {
+    let startX = 0;
+    let startY = 0;
+    let deltaX = 0;
+    let tracking = false;
+    let horizontal = false;
+
+    const resetSwipe = () => {
+      row.style.transform = '';
+      row.classList.remove('list-item-swiping');
+      deltaX = 0;
+      tracking = false;
+      horizontal = false;
+    };
+
+    row.addEventListener('touchstart', (event) => {
+      const touch = event.touches?.[0];
+      if (!touch) return;
+      didSwipe = false;
+      startX = touch.clientX;
+      startY = touch.clientY;
+      deltaX = 0;
+      tracking = true;
+      horizontal = false;
+    }, { passive: true });
+
+    row.addEventListener('touchmove', (event) => {
+      if (!tracking) return;
+      const touch = event.touches?.[0];
+      if (!touch) return;
+      deltaX = touch.clientX - startX;
+      const deltaY = touch.clientY - startY;
+      if (!horizontal && Math.abs(deltaX) > 14 && Math.abs(deltaX) > Math.abs(deltaY)) horizontal = true;
+      if (!horizontal) return;
+      event.preventDefault();
+      row.classList.add('list-item-swiping');
+      row.style.transform = `translateX(${Math.max(-28, Math.min(28, deltaX * 0.18))}px)`;
+    }, { passive: false });
+
+    row.addEventListener('touchend', (event) => {
+      if (!tracking) return;
+      const shouldTrigger = horizontal && Math.abs(deltaX) >= 56;
+      resetSwipe();
+      if (shouldTrigger) {
+        didSwipe = true;
+        options.onSwipe(event);
+        window.setTimeout(() => { didSwipe = false; }, 120);
+      }
+    });
+
+    row.addEventListener('touchcancel', resetSwipe);
   }
 
   return row;

@@ -3,13 +3,13 @@ const SURFACE_DEFINITIONS = {
     bodyClasses: ['widget-surface', 'kitchen-surface'],
     screenClass: 'screen two-columns widget-layout widget-layout-kitchen',
     widgets: [
-      'context',
-      'quickActions',
       'kitchenHeader',
-      'signals',
-      'forget',
-      'spotlight',
-      'upcoming',
+      'quickActions',
+      'kitchenBestNext',
+      'kitchenEvents',
+      'kitchenTodayTasks',
+      'kitchenSignals',
+      'kitchenUpcoming',
     ],
   },
   tv: {
@@ -120,6 +120,11 @@ function renderWidget(widgetId, context) {
 
 const WIDGETS = {
   kitchenHeader: (context) => buildKitchenTodayCard(context),
+  kitchenBestNext: (context) => buildKitchenBestNextCard(context),
+  kitchenEvents: (context) => buildKitchenEventsCard(context),
+  kitchenTodayTasks: (context) => buildKitchenTodayTasksCard(context),
+  kitchenSignals: (context) => buildKitchenSignalsCard(context),
+  kitchenUpcoming: (context) => buildKitchenUpcomingCard(context),
   today: (context) => buildCard('Today', '', renderTaskList(context.digest.todayTasks, 'No tasks visible.', { showPills: true }), 'panel-card panel-today-card'),
   spotlight: (context) => buildCard('Best Next Move', 'Most useful thing to do next', renderSpotlightCard(context.digest.spotlightTasks || (context.digest.spotlightTask ? [context.digest.spotlightTask] : []))),
   signals: (context) => buildCard('Needs Attention', `${context.signals.length} visible`, renderSignalActionList(context.signals.slice(0, 6), 'Everything looks calm right now.'), 'panel-card panel-signals-card'),
@@ -143,6 +148,27 @@ const WIDGETS = {
   recentLogs: () => buildCard('Recent Logs', '', renderList(appState.logs.map(logToItem), 'No quick logs yet.')),
 };
 
+
+
+function buildKitchenBestNextCard(context) {
+  return HCC?.surfaces?.kitchen?.buildBestNextCard ? HCC.surfaces.kitchen.buildBestNextCard(context) : buildCard('Best Next', '', buildEmptyState('Not available yet.'));
+}
+
+function buildKitchenEventsCard(context) {
+  return HCC?.surfaces?.kitchen?.buildEventsCard ? HCC.surfaces.kitchen.buildEventsCard(context) : buildCard('Events', '', buildEmptyState('Not available yet.'));
+}
+
+function buildKitchenTodayTasksCard(context) {
+  return HCC?.surfaces?.kitchen?.buildTodayTasksCard ? HCC.surfaces.kitchen.buildTodayTasksCard(context) : buildCard('Today Tasks', '', buildEmptyState('Not available yet.'));
+}
+
+function buildKitchenSignalsCard(context) {
+  return HCC?.surfaces?.kitchen?.buildSignalsCard ? HCC.surfaces.kitchen.buildSignalsCard(context) : buildCard('Signals', '', buildEmptyState('Not available yet.'));
+}
+
+function buildKitchenUpcomingCard(context) {
+  return HCC?.surfaces?.kitchen?.buildUpcomingCard ? HCC.surfaces.kitchen.buildUpcomingCard(context) : buildCard('Coming Up', '', buildEmptyState('Not available yet.'));
+}
 
 function buildBedroomHeaderStrip() {
   return HCC?.surfaces?.bedroom?.buildHeaderStrip ? HCC.surfaces.bedroom.buildHeaderStrip() : document.createElement('section');

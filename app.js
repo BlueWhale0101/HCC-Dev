@@ -5,6 +5,7 @@ let housekeepingTimer = null;
 let pendingTaskCompletions = new Set();
 let pendingSignalActions = new Set();
 let armedTaskCompletions = new Map();
+let armedSignalDismissals = new Map();
 window.__hccBootState = window.__hccBootState || { started: false, finished: false, phase: 'script-loaded', version: APP_VERSION, errors: [] };
 window.__HCC_FORCE_BOOT = () => startBootstrap();
 
@@ -1008,6 +1009,42 @@ function isTaskCompletionArmed(taskId) {
   return !!taskId && armedTaskCompletions.has(taskId);
 }
 
+function clearArmedSignalDismiss(signalId) {
+  if (!signalId) return;
+  const existingTimer = armedSignalDismissals.get(signalId);
+  if (existingTimer) window.clearTimeout(existingTimer);
+  armedSignalDismissals.delete(signalId);
+}
+
+function armSignalDismiss(signalId) {
+  if (!signalId) return false;
+  clearArmedSignalDismiss(signalId);
+  const timer = window.setTimeout(() => {
+    armedSignalDismissals.delete(signalId);
+    renderRuntimeUi({ renderDevConsole: false });
+  }, TASK_COMPLETE_ARM_WINDOW_MS);
+  armedSignalDismissals.set(signalId, timer);
+  return true;
+}
+
+function isSignalDismissArmed(signalId) {
+  return !!signalId && armedSignalDismissals.has(signalId);
+}
+
+async function handleSignalTap(signal) {
+  const signalId = signal?.id;
+  if (!signalId) return;
+  if (!isSignalDismissArmed(signalId)) {
+    armSignalDismiss(signalId);
+    renderRuntimeUi({ renderDevConsole: false });
+    showToast('Tap again to dismiss', 'info', { durationMs: TASK_COMPLETE_ARM_WINDOW_MS - 250 });
+    setStatus(`Armed dismiss for ${signal?.title || 'signal'}. Tap again to confirm.`);
+    return;
+  }
+  clearArmedSignalDismiss(signalId);
+  await dismissSignal(signal);
+}
+
 function getDisplayItemKey(item = {}) {
   if (item.itemKey) return item.itemKey;
   if (item.id != null) return `id:${item.id}`;
@@ -1056,7 +1093,7 @@ async function dismissSignal(signal) {
   }
 }
 
-function snoozeSignal(signal, minutes = 120) {
+function snoozeSignal(signal, minutes = 60) {
   const signalId = signal?.id;
   if (!signalId || pendingSignalActions.has(`snooze:${signalId}`)) return;
   pendingSignalActions.add(`snooze:${signalId}`);
@@ -2065,11 +2102,11 @@ function buildSignalActionRow(signal) {
   const snoozeButton = document.createElement('button');
   snoozeButton.className = 'secondary-button signal-action-button';
   snoozeButton.type = 'button';
-  snoozeButton.textContent = 'Snooze 2h';
+  snoozeButton.textContent = 'Snooze 1h';
   snoozeButton.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();
-    snoozeSignal(signal, 120);
+    snoozeSignal(signal, 60);
   });
   wrap.append(snoozeButton);
 
@@ -2099,8 +2136,20 @@ function renderSignalActionList(signals, emptyText, options = {}) {
   }
   for (const signal of items) {
     const item = signalToItem(signal);
-    const row = buildListItem(item, { showPills: true, rowClassName: 'list-item signal-action-item' });
-    row.append(buildSignalActionRow(signal));
+    const signalId = signal?.id;
+    if (isSignalDismissArmed(signalId)) {
+      item.meta = [item.meta, 'Tap again to dismiss'].filter(Boolean).join(' · ');
+      item.rowClass = `${item.rowClass || ''} signal-armed`.trim();
+      item.actionHint = 'Tap again to dismiss · Swipe for details';
+    } else {
+      item.actionHint = 'Tap to arm dismiss · Swipe for details';
+    }
+    const row = buildListItem(item, {
+      showPills: true,
+      rowClassName: 'list-item signal-action-item',
+      onActivate: () => handleSignalTap(signal),
+      onSwipe: () => HCC?.ui?.openSignalDetailModal?.(signal),
+    });
     wrapper.append(row);
   }
   return wrapper;
@@ -3283,6 +3332,7 @@ async function fetchGoogleCalendarSnapshots() {
 }
 
 function buildKitchenTodayCard(context) {
+  if (HCC?.surfaces?.kitchen?.buildSummaryCard) return HCC.surfaces.kitchen.buildSummaryCard(context);
   const wrap = document.createElement('div');
   wrap.className = 'kitchen-today-wrap';
 
