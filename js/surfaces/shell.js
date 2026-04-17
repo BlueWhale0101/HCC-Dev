@@ -1,7 +1,7 @@
 const SURFACE_DEFINITIONS = {
   kitchen: {
     bodyClasses: ['widget-surface', 'kitchen-surface'],
-    screenClass: 'screen two-columns widget-layout widget-layout-kitchen',
+    screenClass: 'screen kitchen-screen',
     widgets: [
       'kitchenHeader',
       'kitchenBestNext',
@@ -96,6 +96,13 @@ function renderModeLayout(mode, context) {
       if (node) tvWrap.append(node);
     }
     screenEl.append(tvWrap);
+    if (ambientFooter) screenEl.append(ambientFooter);
+    return;
+  }
+
+  if (mode === 'kitchen' && HCC?.surfaces?.kitchen?.renderSurface) {
+    const node = HCC.surfaces.kitchen.renderSurface(context);
+    if (node) screenEl.append(node);
     if (ambientFooter) screenEl.append(ambientFooter);
     return;
   }

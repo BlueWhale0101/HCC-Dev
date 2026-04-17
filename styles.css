@@ -2681,3 +2681,127 @@ body.bedroom-surface .screen {
 .kitchen-summary-card .list-item {
   min-height: 56px;
 }
+
+
+/* v3.4.4 kitchen layout pass */
+.kitchen-screen {
+  display: block;
+}
+
+.kitchen-command-surface {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.kitchen-top-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-height: 0;
+  padding: 0.9rem 1rem;
+}
+
+.kitchen-top-strip-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.kitchen-top-strip-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.kitchen-top-strip-meta {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.kitchen-top-strip-side {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.kitchen-top-chip {
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(181, 220, 189, 0.10);
+}
+
+.kitchen-top-chip-label {
+  color: var(--muted);
+  font-size: 0.74rem;
+  margin-bottom: 0.2rem;
+}
+
+.kitchen-top-chip-value {
+  font-size: 0.9rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kitchen-command-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.kitchen-command-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.kitchen-quick-strip {
+  padding: 0.8rem 0.9rem;
+}
+
+.kitchen-quick-strip-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.kitchen-quick-strip-row .secondary-button {
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.kitchen-bestnext-card .card-body {
+  min-height: 130px;
+}
+
+.kitchen-bestnext-card .focus-text {
+  font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+}
+
+.kitchen-events-card,
+.kitchen-signals-card,
+.kitchen-tasks-card,
+.kitchen-upcoming-card {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .kitchen-top-strip,
+  .kitchen-command-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .kitchen-top-strip-side {
+    grid-template-columns: 1fr;
+  }
+}
