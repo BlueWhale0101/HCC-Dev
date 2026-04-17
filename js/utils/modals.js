@@ -20,18 +20,81 @@ HCC.ui.showDialog = function showDialog(dialog) {
   else dialog.setAttribute('open', 'open');
 };
 
-HCC.ui.openTaskCategoryOverrideModal = function openTaskCategoryOverrideModal(task) {
+HCC.ui.openTaskCategoryOverrideModal = function openTaskCategoryOverrideModal(task, options = {}) {
   if (!task?.id) return;
   const defs = Array.isArray(HCC?.tasks?.CATEGORY_DEFINITIONS) ? HCC.tasks.CATEGORY_DEFINITIONS : [];
+  const currentOverride = getTaskCategoryOverride(task.id);
+  const inferred = HCC?.tasks?.inferCategory ? HCC.tasks.inferCategory({ ...task, manualCategory: '' }) : (task.category || 'general');
+  const draft = { value: currentOverride || 'auto' };
+  const mountInto = options?.mountInto || null;
+  const onDone = typeof options?.onDone === 'function' ? options.onDone : null;
+  const onCancel = typeof options?.onCancel === 'function' ? options.onCancel : null;
+
+  const closeInline = () => {
+    if (mountInto) {
+      mountInto.innerHTML = '';
+      mountInto.classList.add('hidden');
+    }
+    if (onCancel) onCancel();
+  };
+
+  const saveOverride = () => {
+    setTaskCategoryOverride(task.id, draft.value);
+    if (mountInto) {
+      mountInto.innerHTML = '';
+      mountInto.classList.add('hidden');
+    }
+    showToast(draft.value === 'auto' ? 'Category override cleared' : `Category set to ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(draft.value) : draft.value}`);
+    renderMode();
+    if (onDone) onDone(draft.value);
+  };
+
+  if (mountInto) {
+    mountInto.innerHTML = '';
+    mountInto.classList.remove('hidden');
+    mountInto.classList.add('bedroom-inline-category-editor');
+
+    const title = document.createElement('div');
+    title.className = 'bedroom-inline-category-title';
+    title.textContent = 'Task category';
+
+    const body = document.createElement('div');
+    body.className = 'mobile-stack signal-modal-form';
+    body.append(makeSelectField('Category override', [['auto', `Auto (inferred: ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(inferred) : inferred})`], ...defs.map((def) => [def.key, def.label])], draft.value, (value) => {
+      draft.value = value;
+    }));
+
+    const hint = document.createElement('div');
+    hint.className = 'muted';
+    hint.textContent = currentOverride
+      ? `Current override: ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(currentOverride) : currentOverride}. Switch back to Auto to clear it.`
+      : 'Overrides are local to this device for now. Auto uses the inferred category.';
+    body.append(hint);
+
+    const footer = document.createElement('div');
+    footer.className = 'signal-modal-footer';
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'secondary-button';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.addEventListener('click', closeInline);
+    const saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.className = 'primary-button';
+    saveBtn.textContent = 'Save';
+    saveBtn.addEventListener('click', saveOverride);
+    footer.append(cancelBtn, saveBtn);
+
+    mountInto.append(title, body, footer);
+    return;
+  }
+
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay signal-modal-overlay';
   const panel = document.createElement('section');
   panel.className = 'modal-panel signal-modal-panel';
   const body = document.createElement('div');
   body.className = 'mobile-stack signal-modal-form';
-  const currentOverride = getTaskCategoryOverride(task.id);
-  const inferred = HCC?.tasks?.inferCategory ? HCC.tasks.inferCategory({ ...task, manualCategory: '' }) : (task.category || 'general');
-  const draft = { value: currentOverride || 'auto' };
 
   const close = () => overlay.remove();
   overlay.addEventListener('click', (event) => {
@@ -71,10 +134,8 @@ HCC.ui.openTaskCategoryOverrideModal = function openTaskCategoryOverrideModal(ta
   saveBtn.className = 'primary-button';
   saveBtn.textContent = 'Save';
   saveBtn.addEventListener('click', () => {
-    setTaskCategoryOverride(task.id, draft.value);
+    saveOverride();
     close();
-    showToast(draft.value === 'auto' ? 'Category override cleared' : `Category set to ${HCC?.tasks?.getCategoryLabel ? HCC.tasks.getCategoryLabel(draft.value) : draft.value}`);
-    renderMode();
   });
   footer.append(cancelBtn, saveBtn);
 
@@ -108,6 +169,10 @@ HCC.ui.openBedroomItemModal = function openBedroomItemModal(item, options = {}) 
   const body = dialog.querySelector('#bedroom-detail-body');
   body.replaceChildren();
 
+  const inlineCategoryHost = document.createElement('section');
+  inlineCategoryHost.className = 'hidden';
+  inlineCategoryHost.id = 'bedroom-inline-category-host';
+
   const hero = document.createElement('section');
   hero.className = `bedroom-detail-hero ${item.categoryKey ? `spotlight-category-${item.categoryKey}` : ''}`.trim();
 
@@ -117,7 +182,7 @@ HCC.ui.openBedroomItemModal = function openBedroomItemModal(item, options = {}) 
   if (kind === 'task') {
     const editButton = buildSecondaryButton('Change category', () => {
       const task = normalizeTaskRows().find((candidate) => candidate.id === item.id) || appState.tasks.find((candidate) => candidate.id === item.id);
-      if (task) HCC.ui.openTaskCategoryOverrideModal(task);
+      if (task) HCC.ui.openTaskCategoryOverrideModal(task, { mountInto: inlineCategoryHost });
     }, 'mini-button');
     top.append(editButton);
   }
@@ -142,7 +207,7 @@ HCC.ui.openBedroomItemModal = function openBedroomItemModal(item, options = {}) 
     hero.append(hint);
   }
 
-  body.append(hero);
+  body.append(hero, inlineCategoryHost);
   HCC.ui.showDialog(dialog);
 };
 
@@ -207,6 +272,15 @@ HCC.ui.openBedroomStatusModal = function openBedroomStatusModal() {
     card.append(titleEl, renderTaskList(sectionDef.items || [], sectionDef.empty, { showPills: true }));
     body.append(card);
   });
+
+  const footerActions = document.createElement('div');
+  footerActions.className = 'bedroom-status-actions';
+  footerActions.append(buildSecondaryButton('Open dev console', () => {
+    try { dialog.close(); } catch {}
+    if (typeof devConsoleEl !== 'undefined' && devConsoleEl) devConsoleEl.classList.remove('hidden');
+    if (typeof renderDevConsole === 'function') renderDevConsole();
+  }));
+  body.append(footerActions);
 
   HCC.ui.showDialog(dialog);
 };
