@@ -1804,8 +1804,17 @@ function renderSignalRuleModalPanel(panel, modalState, rerender, close) {
     saveBtn.type = 'button';
     saveBtn.className = 'secondary-button';
     saveBtn.textContent = 'Save';
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
       if (!saveSignalModalDraft(modalState)) return;
+      try {
+        await pushSharedSignalConfig();
+        await fetchHouseholdConfig();
+      } catch (error) {
+        handleRuntimeActionError('Signal rule save failed', error);
+        showToast('Saved locally, but could not push signal config', 'error');
+        renderRuntimeUi({ renderDevConsole: false });
+        return;
+      }
       close();
       renderRuntimeUi({ renderDevConsole: false });
       showToast('Saved signal rule', 'success');
@@ -1816,8 +1825,17 @@ function renderSignalRuleModalPanel(panel, modalState, rerender, close) {
       deleteBtn.type = 'button';
       deleteBtn.className = 'secondary-button danger-button';
       deleteBtn.textContent = 'Delete';
-      deleteBtn.addEventListener('click', () => {
+      deleteBtn.addEventListener('click', async () => {
         deleteCustomSignalRule(modalState.ruleId);
+        try {
+          await pushSharedSignalConfig();
+          await fetchHouseholdConfig();
+        } catch (error) {
+          handleRuntimeActionError('Custom signal delete failed', error);
+          showToast('Deleted locally, but could not push signal config', 'error');
+          renderRuntimeUi({ renderDevConsole: false });
+          return;
+        }
         close();
         renderRuntimeUi({ renderDevConsole: false });
         showToast('Deleted custom signal', 'success');
