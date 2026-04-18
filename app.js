@@ -2186,7 +2186,8 @@ function renderTaskList(items, emptyText, options = {}) {
   }
   for (const item of items) {
     const onActivate = typeof item.onActivate === 'function' ? item.onActivate : null;
-    wrapper.append(buildListItem(item, { showPills: options.showPills, onActivate }));
+    const onSwipe = typeof item.onSwipe === 'function' ? item.onSwipe : null;
+    wrapper.append(buildListItem(item, { showPills: options.showPills, onActivate, onSwipe }));
   }
   return wrapper;
 }
@@ -2944,13 +2945,17 @@ function renderCalendarAccounts() {
   googleCalendarAccountsEl.replaceChildren(renderCalendarAccountsPanel({ editable: true }));
 }
 
+function getCalendarTimezone() {
+  return String(appState?.config?.calendarTimezone || 'Australia/Darwin').trim() || 'Australia/Darwin';
+}
+
 function formatCalendarEventTime(event) {
   if (event.start?.date) return 'All day';
   const startValue = event.start?.dateTime;
   if (!startValue) return '';
   const date = new Date(startValue);
   if (!Number.isFinite(date.getTime())) return '';
-  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZone: getCalendarTimezone() });
 }
 
 function normalizeCalendarEvent(event, account, calendar) {
@@ -3250,7 +3255,7 @@ async function fetchGoogleCalendarSnapshots() {
         url.searchParams.set('orderBy', 'startTime');
         url.searchParams.set('timeMin', todayStart.toISOString());
         url.searchParams.set('timeMax', dayAfterStart.toISOString());
-        url.searchParams.set('timeZone', Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
+        url.searchParams.set('timeZone', getCalendarTimezone());
         url.searchParams.set('maxResults', '25');
         const data = await googleApiFetch(url.toString(), source.account.accessToken);
         const items = Array.isArray(data.items) ? data.items : [];

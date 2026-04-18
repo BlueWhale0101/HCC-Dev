@@ -2805,3 +2805,11 @@ body.bedroom-surface .screen {
     grid-template-columns: 1fr;
   }
 }
+
+.task-edit-dialog .bedroom-detail-body {
+  gap: 12px;
+}
+.task-edit-dialog .mobile-field-stack input,
+.task-edit-dialog .mobile-field-stack select {
+  width: 100%;
+}

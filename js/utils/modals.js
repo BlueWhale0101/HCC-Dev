@@ -391,3 +391,118 @@ body.append(footerActions);
 
 HCC.ui.showDialog(dialog);
 };
+
+HCC.ui.openTaskEditModal = function openTaskEditModal(taskLike) {
+  const source = taskLike?.raw || taskLike;
+  const taskId = source?.id || taskLike?.id;
+  if (!taskId) return;
+
+  const current = normalizeTaskRows().find((item) => item.id === taskId) || taskLike || source;
+  const raw = current?.raw || source || {};
+  const titleField = appState?.config?.taskTitleField || 'title';
+  const ownerField = appState?.config?.taskOwnerField || 'owner';
+  const dueField = appState?.config?.taskDateField || 'due_text';
+
+  const draft = {
+    title: String(raw?.[titleField] || raw?.title || current?.title || ''),
+    owner: String(raw?.[ownerField] || current?.owner || ''),
+    dueText: String(raw?.[dueField] || raw?.due_text || raw?.due_date || raw?.due || current?.dueText || ''),
+    tag: String(raw?.tag || current?.tag || ''),
+    panel: String(raw?.panel || current?.panel || ''),
+    description: String(raw?.description || current?.description || ''),
+  };
+
+  const dialog = HCC.ui.ensureDialog('task-edit-dialog', 'quick-view-dialog bedroom-detail-dialog task-edit-dialog', `
+    <form method="dialog" class="quick-view-form settings-form bedroom-detail-form">
+      <div class="dialog-header">
+        <h2>Edit task</h2>
+        <button value="cancel" class="secondary-button" type="button" data-close-dialog="true">Close</button>
+      </div>
+      <div id="task-edit-body" class="bedroom-detail-body"></div>
+    </form>
+  `);
+
+  const closeBtn = dialog.querySelector('[data-close-dialog="true"]');
+  if (closeBtn) closeBtn.onclick = () => dialog.close();
+
+  const body = dialog.querySelector('#task-edit-body');
+  body.replaceChildren();
+
+  const inlineCategoryHost = document.createElement('section');
+  inlineCategoryHost.className = 'hidden';
+  inlineCategoryHost.id = 'task-inline-category-host';
+
+  const formWrap = document.createElement('div');
+  formWrap.className = 'mobile-stack signal-modal-form';
+
+  formWrap.append(
+    makeTextField('Title', draft.title, (value) => { draft.title = value; }, 'Buy iron supplement'),
+    makeTextField('Due', draft.dueText, (value) => { draft.dueText = value; }, 'today / tomorrow / Friday'),
+    makeTextField('Owner', draft.owner, (value) => { draft.owner = value; }, 'Wes'),
+    makeTextField('Tag', draft.tag, (value) => { draft.tag = value; }, 'shopping'),
+    makeTextField('Panel', draft.panel, (value) => { draft.panel = value; }, 'upcoming'),
+    makeTextField('Description', draft.description, (value) => { draft.description = value; }, '')
+  );
+
+  const categoryButtonRow = document.createElement('div');
+  categoryButtonRow.className = 'signal-modal-footer';
+  categoryButtonRow.append(
+    buildSecondaryButton('Change category', () => {
+      const task = normalizeTaskRows().find((candidate) => candidate.id === taskId) || current;
+      if (task) HCC.ui.openTaskCategoryOverrideModal(task, { mountInto: inlineCategoryHost });
+    })
+  );
+
+  const saveRow = document.createElement('div');
+  saveRow.className = 'signal-modal-footer';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'secondary-button';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', () => dialog.close());
+
+  const saveBtn = document.createElement('button');
+  saveBtn.type = 'button';
+  saveBtn.className = 'primary-button';
+  saveBtn.textContent = 'Save';
+  saveBtn.addEventListener('click', async () => {
+    const guard = getRemoteWriteGuard('tasks');
+    if (!guard.allowed) {
+      showToast(guard.reason || 'Live connection is degraded. Task not updated.', 'warning', { durationMs: 2400 });
+      setStatus(`Blocked task edit: ${guard.reason || 'write path not ready'}`);
+      return;
+    }
+    const payload = {
+      [titleField]: draft.title,
+      [ownerField]: draft.owner || null,
+      [dueField]: draft.dueText || null,
+      tag: draft.tag || null,
+      panel: draft.panel || null,
+      description: draft.description || null,
+      updated_at: new Date().toISOString(),
+    };
+    const ioStartedAt = startIoOperation('writes', 'tasks', 'editTask');
+    try {
+      const { error } = await appState.supabase
+        .from(appState.config.taskTable || 'tasks')
+        .update(payload)
+        .eq('id', taskId);
+      if (error) throw error;
+      finishIoOperation('writes', 'tasks', ioStartedAt, { ok: true, reason: 'editTask' });
+      dialog.close();
+      await refreshAll('task edited', { includeSlowState: false });
+      showToast('Task updated', 'success');
+      setStatus(`Updated: ${draft.title || 'Task'}`);
+    } catch (error) {
+      finishIoOperation('writes', 'tasks', ioStartedAt, { ok: false, reason: 'editTask', error: error?.message || String(error) });
+      console.error(error);
+      showToast('Could not update task', 'error');
+      setStatus(`Could not update task: ${error.message}`);
+    }
+  });
+
+  saveRow.append(cancelBtn, saveBtn);
+  body.append(formWrap, categoryButtonRow, inlineCategoryHost, saveRow);
+  HCC.ui.showDialog(dialog);
+};

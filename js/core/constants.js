@@ -1,4 +1,4 @@
-const APP_VERSION = '3.4.4';
+const APP_VERSION = '3.4.5';
 const BOOT_TIMEOUT_MS = 8000;
 
 const DEFAULT_CONFIG = {
@@ -24,6 +24,7 @@ const DEFAULT_CONFIG = {
   weatherLatitude: '',
   weatherLongitude: '',
   weatherTimezone: '',
+  calendarTimezone: 'Australia/Darwin',
   signalRulesDraft: null,
   keepScreenAwake: false,
 };
@@ -59,6 +60,7 @@ const LOCAL_ONLY_CONFIG_KEYS = [
   'calendarTodaySnapshotType',
   'calendarTomorrowSnapshotType',
   'uiRefreshSeconds',
+  'calendarTimezone',
 ];
 const TASK_FIELD_CANDIDATES = {
   taskTitleField: ['task', 'title', 'name', 'label'],

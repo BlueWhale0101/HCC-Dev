@@ -74,8 +74,9 @@ HCC.display.toTaskDisplayItem = function toTaskDisplayItem(task = {}, fallbackPi
     manualOverride,
     emphasis: armed ? 'armed' : (task.dueDate && task.dueDate < startOfDay(getNowDate()) ? 'high' : task.dueDate && isSameDay(task.dueDate, getNowDate()) ? 'medium' : 'normal'),
     rowClass: `${taskRowClass(task, armed)} ${HCC.display.getCategoryRowClass('task-category', { effectiveCategory })}`.trim(),
-    actionHint: canComplete ? (armed ? 'Tap again to complete' : 'Tap once to arm completion') : '',
+    actionHint: canComplete ? (armed ? 'Tap again to complete · Swipe to edit' : 'Tap once to arm completion · Swipe to edit') : 'Swipe to edit',
     onActivate: canComplete ? () => completeTask(task.raw || task) : null,
+    onSwipe: () => HCC?.ui?.openTaskEditModal?.(task.raw || task),
     raw: task.raw || task,
   };
 };
