@@ -4,6 +4,115 @@ window.HCC.surfaces = window.HCC.surfaces || {};
 window.HCC.surfaces.kitchen = window.HCC.surfaces.kitchen || {};
 
 (function () {
+  let kitchenViewMode = 'surface';
+  const kitchenOpsFilters = { owner:'all', panel:'all', category:'all', tag:'all', search:'' };
+
+  function buildModeSwitcher(context) {
+    const wrap = document.createElement('section');
+    wrap.className = 'kitchen-mode-switcher panel-card';
+    const seg = document.createElement('div');
+    seg.className = 'kitchen-mode-segmented';
+    ['surface','tasks'].forEach(mode => {
+      const btn = document.createElement('button');
+      btn.className = `kitchen-mode-button ${kitchenViewMode === mode ? 'active' : ''}`;
+      btn.textContent = mode === 'surface' ? 'Surface' : `Tasks (${context.digest.counts.all || 0})`;
+      btn.onclick = () => {
+        kitchenViewMode = mode;
+        renderMode();
+      };
+      seg.append(btn);
+    });
+    wrap.append(seg);
+    return wrap;
+  }
+
+  function buildRecentlyAddedCard(context) {
+    const items = [...(context.digest.allItems || [])].slice(0, 6);
+    return buildCard('Recently Added', 'Newest captured tasks stay visible', renderTaskList(items, 'No recent tasks.', { showPills: true }), 'panel-card');
+  }
+
+  function buildOpsView(context) {
+    const wrap = document.createElement('div');
+    wrap.className = 'kitchen-ops-view';
+
+    const filterBar = document.createElement('section');
+    filterBar.className = 'kitchen-ops-filterbar panel-card';
+
+    const search = document.createElement('input');
+    search.className = 'kitchen-ops-search';
+    search.placeholder = 'Search tasks';
+    search.value = kitchenOpsFilters.search;
+    search.oninput = () => {
+      kitchenOpsFilters.search = search.value;
+      renderMode();
+    };
+
+    function buildSelect(key, values, label) {
+      const select = document.createElement('select');
+      select.className = 'kitchen-ops-select';
+      const all = document.createElement('option');
+      all.value = 'all';
+      all.textContent = label;
+      select.append(all);
+      values.forEach(v => {
+        if (!v) return;
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        select.append(opt);
+      });
+      select.value = kitchenOpsFilters[key] || 'all';
+      select.onchange = () => {
+        kitchenOpsFilters[key] = select.value;
+        renderMode();
+      };
+      return select;
+    }
+
+    const tasks = context.digest.all || [];
+    const owners = [...new Set(tasks.map(t => t.owner).filter(Boolean))].sort();
+    const panels = [...new Set(tasks.map(t => t.panel).filter(Boolean))].sort();
+    const categories = [...new Set(tasks.map(t => t.category).filter(Boolean))].sort();
+    const tags = [...new Set(tasks.map(t => t.tag).filter(Boolean))].sort();
+
+    filterBar.append(search, buildSelect('owner', owners, 'Owner'), buildSelect('panel', panels, 'State'), buildSelect('category', categories, 'Category'), buildSelect('tag', tags, 'Tag'));
+
+    const list = document.createElement('div');
+    list.className = 'kitchen-ops-list panel-card';
+
+    const filtered = tasks.filter(task => {
+      if (kitchenOpsFilters.owner !== 'all' && task.owner !== kitchenOpsFilters.owner) return false;
+      if (kitchenOpsFilters.panel !== 'all' && task.panel !== kitchenOpsFilters.panel) return false;
+      if (kitchenOpsFilters.category !== 'all' && task.category !== kitchenOpsFilters.category) return false;
+      if (kitchenOpsFilters.tag !== 'all' && task.tag !== kitchenOpsFilters.tag) return false;
+      if (kitchenOpsFilters.search) {
+        const hay = [task.task, task.title, task.description, task.tag].join(' ').toLowerCase();
+        if (!hay.includes(kitchenOpsFilters.search.toLowerCase())) return false;
+      }
+      return true;
+    });
+
+    filtered.slice(0, 100).forEach(task => {
+      const row = document.createElement('div');
+      row.className = 'kitchen-ops-row';
+
+      const title = document.createElement('div');
+      title.className = 'kitchen-ops-row-title';
+      title.textContent = task.task || task.title || 'Untitled task';
+
+      const meta = document.createElement('div');
+      meta.className = 'kitchen-ops-row-meta';
+      meta.textContent = [task.owner, task.category, task.panel, task.due_text].filter(Boolean).join(' · ');
+
+      row.append(title, meta);
+      row.onclick = () => openTaskEditModal(task);
+      list.append(row);
+    });
+
+    wrap.append(filterBar, list);
+    return wrap;
+  }
+
   function buildTopStrip(context) {
     const strip = document.createElement('section');
     strip.className = 'kitchen-top-strip panel-card';
@@ -72,6 +181,7 @@ window.HCC.surfaces.kitchen = window.HCC.surfaces.kitchen || {};
     root.className = 'kitchen-command-surface';
 
     const top = buildTopStrip(context);
+    const switcher = buildModeSwitcher(context);
 
     const columns = document.createElement('div');
     columns.className = 'kitchen-command-columns';
@@ -84,6 +194,7 @@ window.HCC.surfaces.kitchen = window.HCC.surfaces.kitchen || {};
     left.append(
       HCC.surfaces.kitchen.buildBestNextCard(context),
       buildQuickActions(context),
+      buildRecentlyAddedCard(context),
       HCC.surfaces.kitchen.buildTodayTasksCard(context)
     );
 
@@ -94,7 +205,14 @@ window.HCC.surfaces.kitchen = window.HCC.surfaces.kitchen || {};
     );
 
     columns.append(left, right);
-    root.append(top, columns);
+    root.append(top, switcher);
+
+    if (kitchenViewMode === 'tasks') {
+      root.append(buildOpsView(context));
+      return root;
+    }
+
+    root.append(columns);
     return root;
   };
 

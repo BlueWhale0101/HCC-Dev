@@ -1,4 +1,4 @@
-const APP_VERSION = '3.4.5';
+const APP_VERSION = '3.5.0';
 const BOOT_TIMEOUT_MS = 8000;
 
 const DEFAULT_CONFIG = {
